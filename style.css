@@ -9,9 +9,28 @@
 
 -----------------------------------------------------------------------------------*/
 /*--------------------------------------------------------------
+Fonts
+--------------------------------------------------------------*/
+@font-face {
+  font-family: 'Work Sans';
+  src: url('assets/fonts/WorkSans-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Work Sans';
+  src: url('assets/fonts/WorkSans-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/*--------------------------------------------------------------
 Typography
 --------------------------------------------------------------*/
 body {
+  font-family: 'Work Sans', Tahoma, sans-serif;
   font-size: 15px;
   line-height: 1.8;
   font-weight: 400;
@@ -194,7 +213,7 @@ body,
 .cbp-l-grid-agency-desc,
 input,
 textarea {
-  font-family: 'roboto', sans-serif;
+  font-family: 'Work Sans', Tahoma, sans-serif;
 }
 
 /*--------------------------------------------------------------
@@ -1704,8 +1723,28 @@ Header General
     display: none;
   }
 }
+#masthead.site-header #site-branding .logo {
+  max-width: 300px;
+}
 #masthead.site-header #site-branding .retina-logo {
   max-width: 50px;
+}
+@media (max-width: 767px) {
+  #masthead.site-header #site-branding .logo {
+    display: none !important;
+  }
+  #masthead.site-header #site-branding .retina-logo {
+    display: block !important;
+    max-width: 50px;
+  }
+}
+@media (min-width: 768px) {
+  #masthead.site-header #site-branding .logo {
+    display: block !important;
+  }
+  #masthead.site-header #site-branding .retina-logo {
+    display: none !important;
+  }
 }
 
 /*--------------------------------------------------------------
