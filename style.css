@@ -1011,6 +1011,28 @@ Footer
 .site-footer.standard.dark .social-links-menu li a i:hover {
   opacity: .6;
 }
+#footer a.footer-email:hover {
+  color: #fdb83e !important;
+}
+#footer a.footer-newsletter:hover {
+  background-color: #e5a636 !important;
+}
+#footer .footer-social a:hover {
+  color: #fdb83e !important;
+}
+.hero-immortals a:hover {
+  background-color: #2a475e !important;
+}
+#footer.site-footer {
+  margin-bottom: 0 !important;
+  padding-bottom: 40px !important;
+  box-shadow: 0 100px 0 100px #111;
+}
+@media (max-width: 768px) {
+  .hero-immortals {
+    min-height: 80vh !important;
+  }
+}
 
 @media (max-width: 767px) {
   .site-footer .footer-content {
@@ -1079,7 +1101,7 @@ Header Standard
     align-items: center;
     height: 100%;
     position: relative;
-    padding: 35px 20px;
+    padding: 25px 20px;
   }
   #masthead.site-header.standard #site-navigation .menu > li:last-of-type {
     padding-right: 0;
@@ -1729,7 +1751,7 @@ Header General
 #masthead.site-header #site-branding .retina-logo {
   max-width: 50px;
 }
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   #masthead.site-header #site-branding .logo {
     display: none !important;
   }
@@ -1738,7 +1760,7 @@ Header General
     max-width: 50px;
   }
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   #masthead.site-header #site-branding .logo {
     display: block !important;
   }
