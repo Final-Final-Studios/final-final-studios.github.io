@@ -45,21 +45,21 @@
             #masthead #site-branding { line-height: 0 !important; margin: 0 !important; padding: 0 !important; }
             #masthead.site-header.standard #site-navigation .menu > li { padding: 0 16px !important; }
             #masthead.site-header.standard #site-navigation .menu > li > a { line-height: 60px !important; }
-            @media (min-width: 501px) {
-                #masthead #ham-trigger-wrap { display: none !important; }
-                #masthead.site-header:not(.hamburger-side) #site-navigation {
-                    position: static !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    float: none !important;
-                    margin-left: auto !important;
-                    width: auto !important;
-                    padding: 0 !important;
-                }
-                #masthead #site-navigation .menu { background-color: transparent !important; }
-                #masthead #site-navigation .menu > li { display: inline-flex !important; border-bottom: none !important; }
-                #masthead #site-navigation .menu > li > a { color: #333 !important; padding: 0 !important; font-size: 14px !important; text-transform: uppercase !important; }
+            /* Always keep inline nav visible at all sizes */
+            #masthead.site-header:not(.hamburger-side) #site-navigation,
+            #masthead.site-header #site-navigation {
+                position: static !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                float: none !important;
+                margin-left: auto !important;
+                width: auto !important;
+                padding: 0 !important;
+                display: block !important;
             }
+            #masthead #site-navigation .menu { background-color: transparent !important; }
+            #masthead #site-navigation .menu > li { display: inline-flex !important; border-bottom: none !important; }
+            #masthead #site-navigation .menu > li > a { color: #333 !important; padding: 0 !important; font-size: 14px !important; text-transform: uppercase !important; }
             /* Footer interactive elements: large touch targets + hover states */
             #footer a {
                 min-height: 44px;
@@ -104,11 +104,6 @@
                             <img class="retina-logo" src="assets/images/logo/Logo_FFS-TransparentSmall.png" alt="Logo Small">
                         </a>
                     </div><!-- .site-branding -->
-                    <span id="ham-trigger-wrap">
-                        <span class="ham-trigger">
-                            <span></span>
-                        </span>
-                    </span>
                     <nav id="site-navigation" class="main-navigation" role="navigation" aria-label="Top Menu">
                         <ul id="top-menu" class="menu">
                             <li class="current-menu-parent"><a href="games.html">Games</a></li>

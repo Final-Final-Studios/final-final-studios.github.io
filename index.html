@@ -20,8 +20,18 @@
         <link rel='stylesheet' id='cubeportfolio-css'  href='assets/lib/cubeportfolio/css/cubeportfolio.min.css' type='text/css' media='all' />     
         <link rel='stylesheet' id='main-css'  href='style.css' type='text/css' media='all' />
         <style>
+            /* Override style.css overflow:hidden that clips hero illustrations */
+            .site-content {
+                overflow: visible !important;
+            }
+            body, #page {
+                overflow-x: hidden;
+            }
+            body {
+                margin-top: 0 !important;
+            }
             #masthead.site-header.standard {
-                background-color: rgba(255,255,255,0.85) !important;
+                background-color: rgba(255,255,255,0.90) !important;
                 box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
                 padding: 0 !important;
                 margin: 0 !important;
@@ -32,7 +42,7 @@
             }
             #masthead.site-header.standard.stuck,
             #masthead.site-header.standard.is-stuck {
-                background-color: rgba(255,255,255,0.85) !important;
+                background-color: rgba(255,255,255,0.90) !important;
                 box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
                 padding: 0 !important;
                 height: 60px !important;
@@ -43,43 +53,50 @@
             #masthead .container { display: flex !important; align-items: center !important; justify-content: space-between !important; height: 60px !important; }
             #masthead #site-branding a { padding: 0 !important; margin: 0 !important; display: flex !important; align-items: center !important; line-height: 1 !important; }
             #masthead #site-branding { line-height: 0 !important; margin: 0 !important; padding: 0 !important; }
-            #masthead.site-header.standard #site-navigation .menu > li { padding: 0 16px !important; }
-            #masthead.site-header.standard #site-navigation .menu > li > a { line-height: 60px !important; }
+            #masthead.site-header.standard #site-navigation .menu > li { padding: 0 4px !important; display: inline-flex !important; align-items: center !important; height: auto !important; }
+            #masthead.site-header.standard #site-navigation .menu > li > a { line-height: 1 !important; }
 
-            /* Keep inline nav visible down to 500px instead of 992px */
-            @media (min-width: 501px) {
-                #masthead #ham-trigger-wrap { display: none !important; }
-                #masthead.site-header:not(.hamburger-side) #site-navigation {
-                    position: static !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    float: none !important;
-                    margin-left: auto !important;
-                    width: auto !important;
-                    padding: 0 !important;
-                }
-                #masthead #site-navigation .menu {
-                    background-color: transparent !important;
-                }
-                #masthead #site-navigation .menu > li {
-                    display: inline-flex !important;
-                    border-bottom: none !important;
-                }
-                #masthead #site-navigation .menu > li > a {
-                    color: #333 !important;
-                    padding: 0 !important;
-                    font-size: 14px !important;
-                    text-transform: uppercase !important;
-                }
+            /* Always keep inline nav visible at all sizes */
+            #masthead.site-header:not(.hamburger-side) #site-navigation,
+            #masthead.site-header #site-navigation {
+                position: static !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                float: none !important;
+                margin-left: auto !important;
+                width: auto !important;
+                padding: 0 !important;
+                display: block !important;
+            }
+            #masthead #site-navigation .menu {
+                background-color: transparent !important;
+            }
+            #masthead #site-navigation .menu > li {
+                display: inline-flex !important;
+                border-bottom: none !important;
+            }
+            #masthead #site-navigation .menu > li > a {
+                color: #333 !important;
+                padding: 8px 16px !important;
+                font-size: 14px !important;
+                text-transform: uppercase !important;
+                border-radius: 20px;
+                transition: color 0.2s, background-color 0.2s;
+                line-height: 1 !important;
+            }
+            #masthead #site-navigation .menu > li > a:hover {
+                color: #c14539 !important;
+                background-color: rgba(0,0,0,0.06) !important;
             }
 
             /* Kill the 80vh min-height from style.css */
             .hero-immortals {
                 min-height: 0 !important;
                 position: relative;
-                overflow: hidden;
+                overflow: visible;
+                margin-top: -60px;
+                padding-top: 0;
             }
-
             /* Hero banner */
             .hero-banner {
                 position: relative;
@@ -87,6 +104,7 @@
                 max-width: 1400px;
                 margin: 0 auto;
                 height: clamp(360px, 42vw, 480px);
+                overflow: visible;
             }
 
             /* Event logos overlay */
@@ -109,6 +127,7 @@
                 justify-content: center;
                 z-index: 5;
                 pointer-events: none;
+                padding-top: 40px;
             }
             .hero-center-block > * {
                 pointer-events: auto;
@@ -172,15 +191,16 @@
                 }
                 .hero-taotie {
                     width: auto !important;
-                    height: 70% !important;
+                    height: 90% !important;
                 }
                 .hero-rabbit {
                     width: auto !important;
                     height: 120% !important;
                     max-width: none !important;
+                    left: -25% !important;
                 }
                 .hero-logo {
-                    width: clamp(150px, 35vw, 240px) !important;
+                    width: clamp(220px, 55vw, 300px) !important;
                     height: auto !important;
                     max-width: none !important;
                 }
@@ -206,8 +226,8 @@
                 }
                 .hero-taotie {
                     width: auto !important;
-                    height: 80% !important;
-                    right: -5% !important;
+                    height: 110% !important;
+                    right: -8% !important;
                 }
                 .hero-rabbit {
                     width: auto !important;
@@ -221,38 +241,72 @@
                 }
             }
 
-            /* Infinite scroll photo gallery */
-            .photo-marquee {
+            /* Screenshot gallery */
+            .screenshot-gallery-wrap {
+                max-width: 900px;
+                margin: 0 auto;
+                padding: 0 15px;
                 overflow: hidden;
-                width: 100%;
+                cursor: grab;
             }
-            .photo-marquee-track {
+            .screenshot-gallery-wrap:active {
+                cursor: grabbing;
+            }
+            .screenshot-track {
                 display: flex;
-                gap: 16px;
-                width: max-content;
-                animation: marqueeScroll 30s linear infinite;
+                gap: 12px;
+                will-change: transform;
             }
-            .photo-marquee-track:hover {
-                animation-play-state: paused;
-            }
-            .photo-marquee-item {
-                flex-shrink: 0;
-                width: 320px;
+            .screenshot-track img {
+                height: 200px;
+                width: auto;
                 border-radius: 6px;
-                overflow: hidden;
-            }
-            .photo-marquee-item img {
-                width: 100%;
-                aspect-ratio: 16/9;
-                object-fit: cover;
-                display: block;
-            }
-            @keyframes marqueeScroll {
-                0% { transform: translateX(0); }
-                100% { transform: translateX(-50%); }
+                flex-shrink: 0;
+                pointer-events: none;
+                user-select: none;
+                -webkit-user-drag: none;
             }
             @media (max-width: 600px) {
-                .photo-marquee-item { width: 240px; }
+                .screenshot-track img { height: 140px; }
+            }
+            /* Lightbox */
+            .screenshot-lightbox {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                z-index: 9999;
+                background: rgba(0,0,0,0.9);
+                align-items: center;
+                justify-content: center;
+            }
+            .screenshot-lightbox.active {
+                display: flex;
+            }
+            .screenshot-lightbox img {
+                max-width: 92vw;
+                max-height: 90vh;
+                border-radius: 6px;
+            }
+            .screenshot-lightbox-close {
+                position: absolute;
+                top: 20px;
+                right: 24px;
+                width: 40px;
+                height: 40px;
+                background: rgba(255,255,255,0.15);
+                border: none;
+                border-radius: 50%;
+                color: #fff;
+                font-size: 24px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                line-height: 1;
+                transition: background 0.2s;
+            }
+            .screenshot-lightbox-close:hover {
+                background: rgba(255,255,255,0.3);
             }
 
             /* Footer interactive elements: large touch targets + hover states */
@@ -283,10 +337,28 @@
                 background-color: #fff !important;
                 color: #111 !important;
             }
+            a.steam-demo-btn,
+            a.steam-demo-btn:link,
+            a.steam-demo-btn:visited {
+                background: #c14539 !important;
+                color: #fff !important;
+                transition: background 0.25s, color 0.25s !important;
+            }
+            a.steam-demo-btn:hover,
+            a.steam-demo-btn:active {
+                background: #fff !important;
+                color: #111 !important;
+            }
+            .steam-demo-btn img {
+                transition: filter 0.25s;
+            }
+            .steam-demo-btn:hover img {
+                filter: invert(1);
+            }
         </style>
 
     </head>
-    <body style="background-image: url('assets/images/art/FinalFinalStudios-Texture-002.png'); background-repeat: repeat; background-size: 512px;">
+    <body style="background-image: url('assets/images/art/FinalFinalStudios-Texture-002.png'); background-repeat: repeat; background-size: 256px;">
 
         <!-- Page Wrapper -->
         <div id="page" class="site">
@@ -299,11 +371,6 @@
                             <img class="retina-logo" src="assets/images/logo/Logo_FFS-TransparentSmall.png" alt="Logo Small">
                         </a>
                     </div><!-- .site-branding -->
-                    <span id="ham-trigger-wrap">
-                        <span class="ham-trigger">
-                            <span></span>                            
-                        </span>                            
-                    </span>
                     <nav id="site-navigation" class="main-navigation" role="navigation" aria-label="Top Menu">
                         <ul id="top-menu" class="menu">
                             <li class=""><a href="games.html">Games</a></li>
@@ -324,20 +391,20 @@
                                     <div class="hero-immortals">
                                         <div class="hero-banner">
                                             <!-- Background art - very back layer, wide screens only -->
-                                            <img class="hero-bg-art" src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-001.png" alt="" style="position:absolute; width:280%; height:auto; max-width:none !important; mix-blend-mode:multiply; pointer-events:none; top:-40%; left:-50%; z-index:0; opacity:0.2;">
+                                            <img class="hero-bg-art" src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-001.png" alt="" style="position:absolute; width:120%; height:auto; max-width:none !important; mix-blend-mode:multiply; pointer-events:none; top:-20%; left:-60%; z-index:0; opacity:0.08;">
                                             <!-- Fire phoenix - fills the banner background -->
                                             <img class="hero-fire" src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-006.png" alt="" style="position:absolute; width:100%; height:auto; max-width:none !important; mix-blend-mode:multiply; pointer-events:none; top:0; right:0; transform-origin:top right;">
                                             <!-- Taotie demon - upper right, rotated, breathing fire -->
-                                            <img class="hero-taotie" src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-004.png" alt="" style="position:absolute; width:55%; height:auto; max-width:none !important; mix-blend-mode:multiply; pointer-events:none; top:-25%; right:-8%; transform:rotate(-30deg); transform-origin:center center; opacity:0.6;">
+                                            <img class="hero-taotie" src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-004.png" alt="" style="position:absolute; width:75%; height:auto; max-width:none !important; mix-blend-mode:multiply; pointer-events:none; top:-35%; right:-20%; transform:rotate(-15deg); transform-origin:center center; opacity:0.75;">
                                             <!-- Rabbit character - lower left, massive, feet cut off -->
                                             <img class="hero-rabbit" src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-005.png" alt="Immortal's Way character" style="position:absolute; width:auto !important; height:130% !important; max-width:none !important; mix-blend-mode:multiply; pointer-events:none; bottom:-45%; left:-10%; transform-origin:center center; opacity:0.8;">
                                             <!-- Centered content: logo + tagline + button -->
                                             <div class="hero-center-block">
-                                                <img class="hero-logo" src="assets/images/art/FinalFinalStudios-ImmortalsWayLogo-001.png" alt="Immortal's Way" style="width:clamp(200px, 45%, 540px); height:auto;">
+                                                <img class="hero-logo" src="assets/images/art/FinalFinalStudios-ImmortalsWayLogo-001.png" alt="Immortal's Way" style="width:clamp(260px, 50%, 540px); height:auto;">
                                                 <div class="hero-tagline">
                                                     <span>Small rabbit vs 12 legendary guardians.<br>A boss-focused action game.</span>
-                                                    <div style="margin-top:6px;">
-                                                        <a href="https://store.steampowered.com/app/2986350/Immortals_Way/" target="_blank" style="display:inline-flex; align-items:center; gap:8px; background:#c14539; color:#fff; padding:8px 20px; border-radius:4px; text-decoration:none; font-family:'Work Sans', sans-serif; font-size:clamp(12px, 1.6vw, 15px); font-weight:600; letter-spacing:0.3px;">
+                                                    <div style="margin-top:16px;">
+                                                        <a class="steam-demo-btn" href="https://store.steampowered.com/app/2986350/Immortals_Way/" target="_blank" style="display:inline-flex; align-items:center; gap:8px; padding:8px 20px; border-radius:4px; text-decoration:none; font-family:'Work Sans', sans-serif; font-size:clamp(12px, 1.6vw, 15px); font-weight:600; letter-spacing:0.3px;">
                                                             <img src="assets/images/logo/Logo-Steam.png" alt="Steam" style="height:18px; width:auto;">
                                                             Steam Demo
                                                         </a>
@@ -354,7 +421,7 @@
                                     </div>
 
                                     <!-- Trailer Section -->
-                                    <div style="padding:40px 0 60px; background:white;">
+                                    <div style="padding:40px 0 60px; background:white; position:relative; z-index:1;">
                                         <div class="container" style="max-width:900px;">
                                             <div style="text-align:center; margin-bottom:24px;">
                                                 <img src="assets/images/lettering/ImmortalsWay-Lettering-WatchTrailer01.png" alt="Watch Trailer" style="width:100%; max-width:360px; height:auto;">
@@ -365,26 +432,31 @@
                                         </div>
                                     </div>
 
-                                    <!-- Event Photos Gallery -->
-                                    <div style="padding:40px 0 60px; background:white;">
-                                        <div class="photo-marquee">
-                                            <div class="photo-marquee-track">
-                                                <!-- Set 1 -->
-                                                <div class="photo-marquee-item"><img src="assets/images/art/FinalFinalStudios-EventPhoto-001.jpg" alt="Event photo"></div>
-                                                <div class="photo-marquee-item"><img src="assets/images/art/FinalFinalStudios-EventPhoto-002.jpg" alt="Event photo"></div>
-                                                <div class="photo-marquee-item"><img src="assets/images/art/FinalFinalStudios-EventPhoto-001.jpg" alt="Event photo"></div>
-                                                <div class="photo-marquee-item"><img src="assets/images/art/FinalFinalStudios-EventPhoto-002.jpg" alt="Event photo"></div>
-                                                <div class="photo-marquee-item"><img src="assets/images/art/FinalFinalStudios-EventPhoto-001.jpg" alt="Event photo"></div>
-                                                <div class="photo-marquee-item"><img src="assets/images/art/FinalFinalStudios-EventPhoto-002.jpg" alt="Event photo"></div>
-                                                <!-- Set 2 (duplicate for seamless loop) -->
-                                                <div class="photo-marquee-item"><img src="assets/images/art/FinalFinalStudios-EventPhoto-001.jpg" alt="Event photo"></div>
-                                                <div class="photo-marquee-item"><img src="assets/images/art/FinalFinalStudios-EventPhoto-002.jpg" alt="Event photo"></div>
-                                                <div class="photo-marquee-item"><img src="assets/images/art/FinalFinalStudios-EventPhoto-001.jpg" alt="Event photo"></div>
-                                                <div class="photo-marquee-item"><img src="assets/images/art/FinalFinalStudios-EventPhoto-002.jpg" alt="Event photo"></div>
-                                                <div class="photo-marquee-item"><img src="assets/images/art/FinalFinalStudios-EventPhoto-001.jpg" alt="Event photo"></div>
-                                                <div class="photo-marquee-item"><img src="assets/images/art/FinalFinalStudios-EventPhoto-002.jpg" alt="Event photo"></div>
+                                    <!-- Game Screenshots Gallery -->
+                                    <div style="padding:40px 0 60px; background:white; position:relative; z-index:1;">
+                                        <div class="screenshot-gallery-wrap" id="screenshotGallery">
+                                            <div class="screenshot-track" id="screenshotTrack">
+                                                <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-001.jpg" alt="Immortal's Way screenshot">
+                                                <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-002.jpg" alt="Immortal's Way screenshot">
+                                                <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-003.jpg" alt="Immortal's Way screenshot">
+                                                <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-004.jpg" alt="Immortal's Way screenshot">
+                                                <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-005.jpg" alt="Immortal's Way screenshot">
+                                                <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-006.jpg" alt="Immortal's Way screenshot">
+                                                <!-- Duplicate for seamless loop -->
+                                                <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-001.jpg" alt="Immortal's Way screenshot">
+                                                <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-002.jpg" alt="Immortal's Way screenshot">
+                                                <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-003.jpg" alt="Immortal's Way screenshot">
+                                                <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-004.jpg" alt="Immortal's Way screenshot">
+                                                <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-005.jpg" alt="Immortal's Way screenshot">
+                                                <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-006.jpg" alt="Immortal's Way screenshot">
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <!-- Screenshot Lightbox -->
+                                    <div class="screenshot-lightbox" id="screenshotLightbox">
+                                        <button class="screenshot-lightbox-close" id="lightboxClose">&times;</button>
+                                        <img src="" alt="Screenshot" id="lightboxImg">
                                     </div>
 
                                 </div>
@@ -409,18 +481,20 @@
                                 <a href="about.html" style="font-size:14px; color:rgba(255,255,255,0.6); text-decoration:none; transition:color 0.2s;">Team</a>
                                 <a href="press.html" style="font-size:14px; color:rgba(255,255,255,0.6); text-decoration:none; transition:color 0.2s;">Press</a>
                             </nav>
-                            <p style="font-size:12px; color:rgba(255,255,255,0.5); margin:6px 0 0;">&copy; 2026 Final Final Studios LLC</p>
                         </div>
                         <!-- Right Column -->
-                        <div style="display:flex; flex-direction:column; gap:14px; align-items:flex-start;">
+                        <div style="display:flex; flex-direction:column; gap:16px; align-items:flex-end; margin-left:auto;">
                             <div class="footer-social" style="display:flex; align-items:center; gap:16px;">
                                 <a href="https://twitter.com/finalfinalst" target="_blank" style="color:rgba(255,255,255,0.6); transition:color 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 512 512"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8l164.9-188.5L26.8 48h145.6l100.5 132.9L389.2 48zm-24.8 373.8h39.1L151.1 88h-42L364.4 421.8z"/></svg></a>
                                 <a href="https://bsky.app/profile/finalfinalstudios.bsky.social" target="_blank" style="color:rgba(255,255,255,0.6); transition:color 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 568 501"><path d="M123.121 33.664C188.241 82.553 258.281 181.68 284 234.873c25.719-53.192 95.759-152.32 160.879-201.21C491.866-1.611 568-28.906 568 57.947c0 17.346-9.945 145.713-15.778 166.555-20.275 72.453-94.155 90.933-159.875 79.748C507.222 323.8 536.444 388.56 473.333 453.32c-119.86 122.992-172.272-30.859-185.702-70.281-2.462-7.227-3.614-10.608-3.631-7.733-.017-2.875-1.169.506-3.631 7.733-13.43 39.422-65.842 193.273-185.702 70.281-63.111-64.76-33.89-129.52 80.986-149.071-65.72 11.185-139.6-7.295-159.875-79.748C10.945 203.659 1 75.291 1 57.946 1-28.906 76.135-1.612 123.121 33.664z"/></svg></a>
                                 <a href="https://www.tiktok.com/@finalfinalstudios" target="_blank" style="color:rgba(255,255,255,0.6); transition:color 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 448 512"><path d="M448 209.9a210.1 210.1 0 0 1-122.8-39.3V349.4A162.6 162.6 0 1 1 185 188.3V278.2a74.6 74.6 0 1 0 52.2 71.2V0h88a121 121 0 0 0 1.9 22.2 122.2 122.2 0 0 0 53.9 80.2 121.4 121.4 0 0 0 67 20.1z"/></svg></a>
+                                <a href="https://www.youtube.com/@FinalFinalStudios" target="_blank" style="color:rgba(255,255,255,0.6); transition:color 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" fill="currentColor" viewBox="0 0 576 512"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg></a>
                             </div>
                             <a href="mailto:hello@finalfinalstudios.com" style="font-size:14px; color:rgba(255,255,255,0.6); text-decoration:none; transition:color 0.2s;">hello@finalfinalstudios.com</a>
-                            <a class="newsletter-btn" href="mailto:hello@finalfinalstudios.com?subject=Newsletter%20Signup&body=I%27d%20like%20to%20sign%20up%20for%20the%20Final%20Final%20Studios%20newsletter!" style="display:inline-block; padding:10px 24px; text-decoration:none; font-size:14px; font-weight:600; border-radius:4px;">Newsletter Signup</a>
+                            <a class="newsletter-btn" href="mailto:hello@finalfinalstudios.com?subject=Newsletter%20Signup&body=I%27d%20like%20to%20sign%20up%20for%20the%20Final%20Final%20Studios%20newsletter!" style="display:inline-flex; align-items:center; gap:8px; padding:10px 24px; text-decoration:none; font-size:14px; font-weight:600; border-radius:4px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 512 512"><path d="M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48H48zM0 176V384c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V176L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z"/></svg>Newsletter Signup</a>
                         </div>
+                        <!-- Copyright -->
+                        <p style="width:100%; text-align:center; font-size:12px; color:rgba(255,255,255,0.5); margin:20px 0 0;">&copy;2026 Final Final Studios LLC</p>
                     </div>
                 </footer>
 
@@ -436,6 +510,169 @@
         <script type='text/javascript' src='assets/lib/swiper/js/swiper.min.js'></script>        
 
         <script type='text/javascript' src='assets/js/main.js'></script>
+        <script>
+        (function() {
+            var wrap = document.getElementById('screenshotGallery');
+            var track = document.getElementById('screenshotTrack');
+            var imgs = track.querySelectorAll('img');
+            var halfCount = imgs.length / 2;
+            var gap = 12;
+            var scrollPos = 0;
+            var speed = 0.5; // px per frame
+            var autoPlay = true;
+            var isDragging = false;
+            var dragStartX = 0;
+            var dragStartScroll = 0;
+            var dragDelta = 0;
+            var halfWidth = 0;
+
+            // Momentum tracking
+            var velocity = 0;
+            var friction = 0.95;
+            var lastDragX = 0;
+            var lastDragTime = 0;
+
+            // Calculate half-width once images load
+            function calcHalfWidth() {
+                halfWidth = 0;
+                for (var i = 0; i < halfCount; i++) {
+                    halfWidth += imgs[i].offsetWidth + gap;
+                }
+            }
+            // Recalc on load and resize
+            window.addEventListener('load', calcHalfWidth);
+            window.addEventListener('resize', calcHalfWidth);
+
+            // Auto-scroll loop
+            function tick() {
+                // Apply momentum when not dragging and not autoplaying
+                if (!isDragging && Math.abs(velocity) > 0.2) {
+                    scrollPos += velocity;
+                    velocity *= friction;
+                } else if (!isDragging && Math.abs(velocity) <= 0.2) {
+                    velocity = 0;
+                }
+
+                if (autoPlay && !isDragging && velocity === 0) {
+                    scrollPos += speed;
+                }
+                if (halfWidth > 0 && scrollPos >= halfWidth) {
+                    scrollPos -= halfWidth;
+                }
+                if (scrollPos < 0) {
+                    scrollPos += halfWidth;
+                }
+                track.style.transform = 'translateX(' + (-scrollPos) + 'px)';
+                requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+
+            // Pause on hover
+            wrap.addEventListener('mouseenter', function() { autoPlay = false; });
+            wrap.addEventListener('mouseleave', function() { if (!isDragging && velocity === 0) autoPlay = true; });
+
+            // Mouse drag
+            wrap.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                velocity = 0;
+                dragStartX = e.clientX;
+                dragStartScroll = scrollPos;
+                dragDelta = 0;
+                lastDragX = e.clientX;
+                lastDragTime = Date.now();
+                e.preventDefault();
+            });
+            window.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                dragDelta = dragStartX - e.clientX;
+                scrollPos = dragStartScroll + dragDelta;
+
+                // Track velocity from recent movement
+                var now = Date.now();
+                var dt = now - lastDragTime;
+                if (dt > 0) {
+                    velocity = (lastDragX - e.clientX) / dt * 16; // normalize to ~per-frame
+                }
+                lastDragX = e.clientX;
+                lastDragTime = now;
+            });
+            window.addEventListener('mouseup', function() {
+                if (!isDragging) return;
+                isDragging = false;
+                // Cap velocity
+                if (Math.abs(velocity) > 30) velocity = velocity > 0 ? 30 : -30;
+                // If barely dragged, kill velocity (it's a click)
+                if (Math.abs(dragDelta) < 5) velocity = 0;
+            });
+
+            // Touch drag
+            wrap.addEventListener('touchstart', function(e) {
+                isDragging = true;
+                autoPlay = false;
+                velocity = 0;
+                dragStartX = e.touches[0].clientX;
+                dragStartScroll = scrollPos;
+                dragDelta = 0;
+                lastDragX = e.touches[0].clientX;
+                lastDragTime = Date.now();
+            }, { passive: true });
+            wrap.addEventListener('touchmove', function(e) {
+                if (!isDragging) return;
+                dragDelta = dragStartX - e.touches[0].clientX;
+                scrollPos = dragStartScroll + dragDelta;
+
+                var now = Date.now();
+                var dt = now - lastDragTime;
+                if (dt > 0) {
+                    velocity = (lastDragX - e.touches[0].clientX) / dt * 16;
+                }
+                lastDragX = e.touches[0].clientX;
+                lastDragTime = now;
+            }, { passive: true });
+            wrap.addEventListener('touchend', function() {
+                isDragging = false;
+                if (Math.abs(velocity) > 30) velocity = velocity > 0 ? 30 : -30;
+                if (Math.abs(dragDelta) < 5) velocity = 0;
+                // Resume autoplay after momentum dies
+                var checkMomentum = setInterval(function() {
+                    if (Math.abs(velocity) < 0.2) {
+                        clearInterval(checkMomentum);
+                        autoPlay = true;
+                    }
+                }, 100);
+            });
+
+            // Lightbox
+            var lightbox = document.getElementById('screenshotLightbox');
+            var lightboxImg = document.getElementById('lightboxImg');
+            var lightboxClose = document.getElementById('lightboxClose');
+
+            wrap.addEventListener('click', function(e) {
+                if (Math.abs(dragDelta) > 5) return; // was a drag, not a click
+                var rect = wrap.getBoundingClientRect();
+                var clickX = e.clientX - rect.left + scrollPos;
+                var x = 0;
+                for (var i = 0; i < imgs.length; i++) {
+                    var w = imgs[i].offsetWidth;
+                    if (clickX >= x && clickX <= x + w) {
+                        lightboxImg.src = imgs[i].src;
+                        lightbox.classList.add('active');
+                        break;
+                    }
+                    x += w + gap;
+                }
+            });
+            lightboxClose.addEventListener('click', function() {
+                lightbox.classList.remove('active');
+            });
+            lightbox.addEventListener('click', function(e) {
+                if (e.target === lightbox) lightbox.classList.remove('active');
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') lightbox.classList.remove('active');
+            });
+        })();
+        </script>
         <!--  Scripts Ends -->
     </body>
 </html>
