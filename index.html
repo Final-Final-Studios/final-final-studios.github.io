@@ -7,7 +7,22 @@
         <!-- Metas -->      
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="author" content="CaliberThemes" />
+        <meta name="author" content="Final Final Studios" />
+        <meta name="description" content="Final Final Studios is a 2-person indie game studio. Creators of Immortal's Way, a boss-focused action game inspired by Chinese mythology." />
+        <link rel="canonical" href="https://finalfinalstudios.com/" />
+
+        <!-- Open Graph -->
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Final Final Studios — Immortal's Way" />
+        <meta property="og:description" content="A 2-person indie studio. Creators of Immortal's Way, a boss-focused action game inspired by Chinese mythology." />
+        <meta property="og:image" content="https://finalfinalstudios.com/assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-005.jpg" />
+        <meta property="og:url" content="https://finalfinalstudios.com/" />
+
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Final Final Studios — Immortal's Way" />
+        <meta name="twitter:description" content="A 2-person indie studio. Creators of Immortal's Way, a boss-focused action game inspired by Chinese mythology." />
+        <meta name="twitter:image" content="https://finalfinalstudios.com/assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-005.jpg" />
 
         <!-- Favicon -->      
         <link rel="icon" type="image/png" href="assets/images/favicon.png" />
@@ -49,7 +64,7 @@
             }
             #masthead .logo { display: none !important; }
             #masthead .retina-logo { display: inline-block !important; max-height: 28px !important; }
-            #masthead .main-navigation a { font-weight: 600 !important; }
+            #masthead .main-navigation a { font-weight: 500 !important; }
             #masthead .container { display: flex !important; align-items: center !important; justify-content: space-between !important; height: 60px !important; }
             #masthead #site-branding a { padding: 0 !important; margin: 0 !important; display: flex !important; align-items: center !important; line-height: 1 !important; }
             #masthead #site-branding { line-height: 0 !important; margin: 0 !important; padding: 0 !important; }
@@ -80,7 +95,7 @@
                 padding: 8px 16px !important;
                 font-size: 14px !important;
                 text-transform: uppercase !important;
-                border-radius: 20px;
+                border-radius: 4px;
                 transition: color 0.2s, background-color 0.2s;
                 line-height: 1 !important;
             }
@@ -103,7 +118,7 @@
                 width: 100%;
                 max-width: 1400px;
                 margin: 0 auto;
-                height: clamp(360px, 42vw, 480px);
+                height: clamp(480px, 52vw, 560px);
                 overflow: visible;
             }
 
@@ -117,7 +132,7 @@
             }
             .hero-center-block {
                 position: absolute;
-                top: 0;
+                top: 12%;
                 left: 0;
                 right: 0;
                 bottom: 0;
@@ -127,7 +142,6 @@
                 justify-content: center;
                 z-index: 5;
                 pointer-events: none;
-                padding-top: 40px;
             }
             .hero-center-block > * {
                 pointer-events: auto;
@@ -137,7 +151,7 @@
                 font-family: 'Cormorant Garamond', Georgia, serif;
                 font-size: clamp(17px, 2.6vw, 26px);
                 color: #333;
-                font-weight: 600;
+                font-weight: 500;
                 letter-spacing: 0.3px;
                 margin-top: 6px;
             }
@@ -181,6 +195,21 @@
                 animation-delay: -1s;
             }
 
+            /* Mobile: stack other games columns + smaller lettering */
+            @media (max-width: 600px) {
+                .other-games-grid {
+                    grid-template-columns: 1fr !important;
+                }
+                .brush-title {
+                    max-width: 220px !important;
+                }
+            }
+
+            .other-game-btn:hover {
+                background: #111 !important;
+                color: #fff !important;
+            }
+
             /* Mobile hero adjustments - height-based image sizing */
             @media (max-width: 768px) {
                 .hero-fire {
@@ -192,6 +221,8 @@
                 .hero-taotie {
                     width: auto !important;
                     height: 90% !important;
+                    right: -30% !important;
+                    top: -45% !important;
                 }
                 .hero-rabbit {
                     width: auto !important;
@@ -243,7 +274,7 @@
 
             /* Screenshot gallery */
             .screenshot-gallery-wrap {
-                max-width: 900px;
+                max-width: 1100px;
                 margin: 0 auto;
                 padding: 0 15px;
                 overflow: hidden;
@@ -258,16 +289,13 @@
                 will-change: transform;
             }
             .screenshot-track img {
-                height: 200px;
+                height: clamp(200px, 28vw, 280px);
                 width: auto;
                 border-radius: 6px;
                 flex-shrink: 0;
                 pointer-events: none;
                 user-select: none;
                 -webkit-user-drag: none;
-            }
-            @media (max-width: 600px) {
-                .screenshot-track img { height: 140px; }
             }
             /* Lightbox */
             .screenshot-lightbox {
@@ -359,6 +387,7 @@
 
     </head>
     <body style="background-image: url('assets/images/art/FinalFinalStudios-Texture-002.png'); background-repeat: repeat; background-size: 256px;">
+        <a href="#main" class="skip-link" style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; z-index:10000; padding:8px 16px; background:#c14539; color:#fff; text-decoration:none; font-size:14px;" onfocus="this.style.position='fixed';this.style.left='8px';this.style.top='8px';this.style.width='auto';this.style.height='auto';" onblur="this.style.position='absolute';this.style.left='-9999px';this.style.width='1px';this.style.height='1px';">Skip to main content</a>
 
         <!-- Page Wrapper -->
         <div id="page" class="site">
@@ -373,11 +402,12 @@
                     </div><!-- .site-branding -->
                     <nav id="site-navigation" class="main-navigation" role="navigation" aria-label="Top Menu">
                         <ul id="top-menu" class="menu">
-                            <li class=""><a href="games.html">Games</a></li>
+                            <li class=""><a href="index.html">Games</a></li>
                             <li class=""><a href="about.html">Team</a></li>
-                            <li class=""><a href="press.html">Press</a></li>
-                    </nav>                            
-                </div><!-- .wrap -->        
+                            <!-- <li class=""><a href="press.html">Press</a></li> -->
+                        </ul>
+                    </nav>
+                </div><!-- .wrap -->
             </header>
 
             <div class="site-content-contain">
@@ -395,7 +425,7 @@
                                             <!-- Fire phoenix - fills the banner background -->
                                             <img class="hero-fire" src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-006.png" alt="" style="position:absolute; width:100%; height:auto; max-width:none !important; mix-blend-mode:multiply; pointer-events:none; top:0; right:0; transform-origin:top right;">
                                             <!-- Taotie demon - upper right, rotated, breathing fire -->
-                                            <img class="hero-taotie" src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-004.png" alt="" style="position:absolute; width:75%; height:auto; max-width:none !important; mix-blend-mode:multiply; pointer-events:none; top:-35%; right:-20%; transform:rotate(-15deg); transform-origin:center center; opacity:0.75;">
+                                            <img class="hero-taotie" src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-004.png" alt="" style="position:absolute; width:75%; height:auto; max-width:none !important; mix-blend-mode:multiply; pointer-events:none; top:-35%; right:-12%; transform:rotate(-15deg); transform-origin:center center; opacity:0.75;">
                                             <!-- Rabbit character - lower left, massive, feet cut off -->
                                             <img class="hero-rabbit" src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-005.png" alt="Immortal's Way character" style="position:absolute; width:auto !important; height:130% !important; max-width:none !important; mix-blend-mode:multiply; pointer-events:none; bottom:-45%; left:-10%; transform-origin:center center; opacity:0.8;">
                                             <!-- Centered content: logo + tagline + button -->
@@ -404,7 +434,7 @@
                                                 <div class="hero-tagline">
                                                     <span>Small rabbit vs 12 legendary guardians.<br>A boss-focused action game.</span>
                                                     <div style="margin-top:16px;">
-                                                        <a class="steam-demo-btn" href="https://store.steampowered.com/app/2986350/Immortals_Way/" target="_blank" style="display:inline-flex; align-items:center; gap:8px; padding:8px 20px; border-radius:4px; text-decoration:none; font-family:'Work Sans', sans-serif; font-size:clamp(12px, 1.6vw, 15px); font-weight:600; letter-spacing:0.3px;">
+                                                        <a class="steam-demo-btn" href="https://store.steampowered.com/app/2986350/Immortals_Way/" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:8px; padding:8px 20px; border-radius:4px; text-decoration:none; font-family:'Work Sans', sans-serif; font-size:clamp(12px, 1.6vw, 15px); font-weight:500; letter-spacing:0.3px;">
                                                             <img src="assets/images/logo/Logo-Steam.png" alt="Steam" style="height:18px; width:auto;">
                                                             Steam Demo
                                                         </a>
@@ -424,26 +454,30 @@
                                     <div style="padding:40px 0 60px; background:white; position:relative; z-index:1;">
                                         <div class="container" style="max-width:900px;">
                                             <div style="text-align:center; margin-bottom:24px;">
-                                                <img src="assets/images/lettering/ImmortalsWay-Lettering-WatchTrailer01.png" alt="Watch Trailer" style="width:100%; max-width:360px; height:auto;">
+                                                <img class="brush-title" src="assets/images/lettering/ImmortalsWay-Lettering-WatchTrailer01.png" alt="Watch Trailer" style="width:100%; max-width:360px; height:auto;">
                                             </div>
                                             <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:8px;">
                                                 <iframe src="https://www.youtube-nocookie.com/embed/aEir4QZI5q8" title="Immortal's Way Trailer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="position:absolute; top:0; left:0; width:100%; height:100%;"></iframe>
                                             </div>
+                                            <p style="text-align:center; font-family:'Cormorant Garamond', Georgia, serif; font-size:clamp(15px, 2vw, 18px); color:#555; line-height:1.6; margin:24px auto 0; max-width:600px;">The Shanhaijing told of creatures that could swallow the sun and split mountains. Now they guard the Isle of Penglai and stand before you and immortality.</p>
                                         </div>
                                     </div>
 
                                     <!-- Game Screenshots Gallery -->
-                                    <div style="padding:40px 0 60px; background:white; position:relative; z-index:1;">
+                                    <div style="padding:40px 0 60px; background:#f5f5f5; position:relative; z-index:1;">
+                                        <div style="text-align:center; margin-bottom:24px;">
+                                            <img class="brush-title" src="assets/images/lettering/ImmortalsWay-Lettering-Screenshots01.png" alt="Screenshots" style="width:100%; max-width:360px; height:auto;">
+                                        </div>
                                         <div class="screenshot-gallery-wrap" id="screenshotGallery">
                                             <div class="screenshot-track" id="screenshotTrack">
-                                                <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-001.jpg" alt="Immortal's Way screenshot">
+                                                <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-005.jpg" alt="Immortal's Way screenshot">
                                                 <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-002.jpg" alt="Immortal's Way screenshot">
                                                 <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-003.jpg" alt="Immortal's Way screenshot">
                                                 <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-004.jpg" alt="Immortal's Way screenshot">
                                                 <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-005.jpg" alt="Immortal's Way screenshot">
                                                 <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-006.jpg" alt="Immortal's Way screenshot">
                                                 <!-- Duplicate for seamless loop -->
-                                                <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-001.jpg" alt="Immortal's Way screenshot">
+                                                <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-005.jpg" alt="Immortal's Way screenshot">
                                                 <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-002.jpg" alt="Immortal's Way screenshot">
                                                 <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-003.jpg" alt="Immortal's Way screenshot">
                                                 <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-004.jpg" alt="Immortal's Way screenshot">
@@ -451,12 +485,43 @@
                                                 <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-006.jpg" alt="Immortal's Way screenshot">
                                             </div>
                                         </div>
+                                        <div style="text-align:center; margin-top:24px;">
+                                            <a class="steam-demo-btn" href="https://store.steampowered.com/app/2986350/Immortals_Way/" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:8px; padding:10px 24px; border-radius:4px; text-decoration:none; font-family:'Work Sans', sans-serif; font-size:14px; font-weight:500; letter-spacing:0.3px;"><img src="assets/images/logo/Logo-Steam.png" alt="Steam" style="height:18px; width:auto;">Wishlist on Steam</a>
+                                        </div>
                                     </div>
 
                                     <!-- Screenshot Lightbox -->
                                     <div class="screenshot-lightbox" id="screenshotLightbox">
-                                        <button class="screenshot-lightbox-close" id="lightboxClose">&times;</button>
+                                        <button class="screenshot-lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
                                         <img src="" alt="Screenshot" id="lightboxImg">
+                                    </div>
+
+                                    <!-- Other Games -->
+                                    <div style="padding:40px 0 60px; background:white; position:relative; z-index:1;">
+                                        <div class="container" style="max-width:900px;">
+                                            <div style="text-align:center; margin-bottom:32px;">
+                                                <img class="brush-title" src="assets/images/lettering/ImmortalsWay-Lettering-OtherGames01.png" alt="Other Games" style="width:100%; max-width:360px; height:auto;">
+                                            </div>
+                                            <div class="other-games-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:32px;">
+                                                <!-- Black Hat Cooperative -->
+                                                <div style="text-align:center;">
+                                                    <img src="assets/images/art/FinalFinalStudios-BlackHatCooperative-001.jpg" alt="Black Hat Cooperative" style="width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:4px; margin-bottom:16px;">
+                                                    <h3 style="font-family:'Work Sans', sans-serif; font-size:18px; font-weight:500; margin:0 0 8px; color:#111;">Black Hat Cooperative</h3>
+                                                    <p style="font-size:14px; color:#555; line-height:1.5; margin:0 0 12px;">Award winning VR co-op game, VC funded. 40,000+ copies sold on Steam, Oculus Store, and Vive.</p>
+                                                    <a class="other-game-btn" href="https://store.steampowered.com/app/503100/Black_Hat_Cooperative/" target="_blank" rel="noopener noreferrer" style="display:inline-block; padding:8px 20px; font-size:13px; font-weight:500; color:#111; background:transparent; border:2px solid #111; border-radius:4px; text-decoration:none; transition:background 0.2s, color 0.2s;">Steam Page</a>
+                                                </div>
+                                                <!-- Spellphabet -->
+                                                <div style="text-align:center;">
+                                                    <img src="assets/images/art/FinalFinalStudios-Spellphabet002.png" alt="Spellphabet" style="width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:4px; margin-bottom:16px;">
+                                                    <h3 style="font-family:'Work Sans', sans-serif; font-size:18px; font-weight:500; margin:0 0 8px; color:#111;">Spellphabet</h3>
+                                                    <p style="font-size:14px; color:#555; line-height:1.5; margin:0 0 12px;">Teacher Approved magic spelling game. Like Scribblenauts for kids 2-7 years old.</p>
+                                                    <div style="display:flex; gap:10px; justify-content:center;">
+                                                        <a class="other-game-btn" href="https://apps.apple.com/us/app/spellphabet/id6482660876" target="_blank" rel="noopener noreferrer" style="display:inline-block; padding:8px 20px; font-size:13px; font-weight:500; color:#111; background:transparent; border:2px solid #111; border-radius:4px; text-decoration:none; transition:background 0.2s, color 0.2s;">iOS</a>
+                                                        <a class="other-game-btn" href="https://play.google.com/store/apps/details?id=com.FinalFinalStudios.Spellphabet" target="_blank" rel="noopener noreferrer" style="display:inline-block; padding:8px 20px; font-size:13px; font-weight:500; color:#111; background:transparent; border:2px solid #111; border-radius:4px; text-decoration:none; transition:background 0.2s, color 0.2s;">Android</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                 </div>
@@ -471,30 +536,34 @@
 
             </div> <!-- .site-content-contain -->
 
-                <footer id="footer" class="site-footer" role="contentinfo" style="background-color:#111; padding:60px 0 40px; border-top:none; margin-bottom:0;">
-                    <div class="container" style="display:flex; justify-content:space-between; align-items:flex-start; gap:40px; max-width:900px; margin:0 auto; flex-wrap:wrap;">
-                        <!-- Left Column -->
-                        <div style="display:flex; flex-direction:column; gap:14px;">
-                            <img src="assets/images/logo/Logo_FFS-TransparentWhiteSmall.png" alt="Final Final Studios" style="width:60px;">
-                            <nav style="display:flex; flex-direction:column; gap:8px;">
-                                <a href="games.html" style="font-size:14px; color:rgba(255,255,255,0.6); text-decoration:none; transition:color 0.2s;">Games</a>
-                                <a href="about.html" style="font-size:14px; color:rgba(255,255,255,0.6); text-decoration:none; transition:color 0.2s;">Team</a>
-                                <a href="press.html" style="font-size:14px; color:rgba(255,255,255,0.6); text-decoration:none; transition:color 0.2s;">Press</a>
-                            </nav>
-                        </div>
-                        <!-- Right Column -->
-                        <div style="display:flex; flex-direction:column; gap:16px; align-items:flex-end; margin-left:auto;">
-                            <div class="footer-social" style="display:flex; align-items:center; gap:16px;">
-                                <a href="https://twitter.com/finalfinalst" target="_blank" style="color:rgba(255,255,255,0.6); transition:color 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 512 512"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8l164.9-188.5L26.8 48h145.6l100.5 132.9L389.2 48zm-24.8 373.8h39.1L151.1 88h-42L364.4 421.8z"/></svg></a>
-                                <a href="https://bsky.app/profile/finalfinalstudios.bsky.social" target="_blank" style="color:rgba(255,255,255,0.6); transition:color 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 568 501"><path d="M123.121 33.664C188.241 82.553 258.281 181.68 284 234.873c25.719-53.192 95.759-152.32 160.879-201.21C491.866-1.611 568-28.906 568 57.947c0 17.346-9.945 145.713-15.778 166.555-20.275 72.453-94.155 90.933-159.875 79.748C507.222 323.8 536.444 388.56 473.333 453.32c-119.86 122.992-172.272-30.859-185.702-70.281-2.462-7.227-3.614-10.608-3.631-7.733-.017-2.875-1.169.506-3.631 7.733-13.43 39.422-65.842 193.273-185.702 70.281-63.111-64.76-33.89-129.52 80.986-149.071-65.72 11.185-139.6-7.295-159.875-79.748C10.945 203.659 1 75.291 1 57.946 1-28.906 76.135-1.612 123.121 33.664z"/></svg></a>
-                                <a href="https://www.tiktok.com/@finalfinalstudios" target="_blank" style="color:rgba(255,255,255,0.6); transition:color 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 448 512"><path d="M448 209.9a210.1 210.1 0 0 1-122.8-39.3V349.4A162.6 162.6 0 1 1 185 188.3V278.2a74.6 74.6 0 1 0 52.2 71.2V0h88a121 121 0 0 0 1.9 22.2 122.2 122.2 0 0 0 53.9 80.2 121.4 121.4 0 0 0 67 20.1z"/></svg></a>
-                                <a href="https://www.youtube.com/@FinalFinalStudios" target="_blank" style="color:rgba(255,255,255,0.6); transition:color 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" fill="currentColor" viewBox="0 0 576 512"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg></a>
+                <footer id="footer" class="site-footer" role="contentinfo" style="background-color:#111; border-top:none; margin:0; padding:0;">
+                    <div style="background-color:#1a1a1a; padding:60px 0 40px;">
+                        <div class="container" style="display:flex; justify-content:space-between; align-items:flex-start; gap:40px; max-width:900px; margin:0 auto; flex-wrap:wrap;">
+                            <!-- Left Column -->
+                            <div style="display:flex; flex-direction:column; gap:14px;">
+                                <img src="assets/images/logo/Logo_FFS-TransparentWhiteSmall.png" alt="Final Final Studios" style="width:60px;">
+                                <nav style="display:flex; flex-direction:column; gap:8px;">
+                                    <a href="index.html" style="font-size:14px; color:rgba(255,255,255,0.6); text-decoration:none; transition:color 0.2s;">Games</a>
+                                    <a href="about.html" style="font-size:14px; color:rgba(255,255,255,0.6); text-decoration:none; transition:color 0.2s;">Team</a>
+                                    <!-- <a href="press.html" style="font-size:14px; color:rgba(255,255,255,0.6); text-decoration:none; transition:color 0.2s;">Press</a> -->
+                                </nav>
                             </div>
-                            <a href="mailto:hello@finalfinalstudios.com" style="font-size:14px; color:rgba(255,255,255,0.6); text-decoration:none; transition:color 0.2s;">hello@finalfinalstudios.com</a>
-                            <a class="newsletter-btn" href="mailto:hello@finalfinalstudios.com?subject=Newsletter%20Signup&body=I%27d%20like%20to%20sign%20up%20for%20the%20Final%20Final%20Studios%20newsletter!" style="display:inline-flex; align-items:center; gap:8px; padding:10px 24px; text-decoration:none; font-size:14px; font-weight:600; border-radius:4px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 512 512"><path d="M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48H48zM0 176V384c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V176L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z"/></svg>Newsletter Signup</a>
+                            <!-- Right Column -->
+                            <div style="display:flex; flex-direction:column; gap:16px; align-items:flex-end; margin-left:auto;">
+                                <div class="footer-social" style="display:flex; align-items:center; gap:16px;">
+                                    <a href="https://twitter.com/finalfinalst" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)" style="color:rgba(255,255,255,0.6); transition:color 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 512 512"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8l164.9-188.5L26.8 48h145.6l100.5 132.9L389.2 48zm-24.8 373.8h39.1L151.1 88h-42L364.4 421.8z"/></svg></a>
+                                    <a href="https://bsky.app/profile/finalfinalstudios.bsky.social" target="_blank" rel="noopener noreferrer" aria-label="Bluesky" style="color:rgba(255,255,255,0.6); transition:color 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 568 501"><path d="M123.121 33.664C188.241 82.553 258.281 181.68 284 234.873c25.719-53.192 95.759-152.32 160.879-201.21C491.866-1.611 568-28.906 568 57.947c0 17.346-9.945 145.713-15.778 166.555-20.275 72.453-94.155 90.933-159.875 79.748C507.222 323.8 536.444 388.56 473.333 453.32c-119.86 122.992-172.272-30.859-185.702-70.281-2.462-7.227-3.614-10.608-3.631-7.733-.017-2.875-1.169.506-3.631 7.733-13.43 39.422-65.842 193.273-185.702 70.281-63.111-64.76-33.89-129.52 80.986-149.071-65.72 11.185-139.6-7.295-159.875-79.748C10.945 203.659 1 75.291 1 57.946 1-28.906 76.135-1.612 123.121 33.664z"/></svg></a>
+                                    <a href="https://www.tiktok.com/@finalfinalstudios" target="_blank" rel="noopener noreferrer" aria-label="TikTok" style="color:rgba(255,255,255,0.6); transition:color 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 448 512"><path d="M448 209.9a210.1 210.1 0 0 1-122.8-39.3V349.4A162.6 162.6 0 1 1 185 188.3V278.2a74.6 74.6 0 1 0 52.2 71.2V0h88a121 121 0 0 0 1.9 22.2 122.2 122.2 0 0 0 53.9 80.2 121.4 121.4 0 0 0 67 20.1z"/></svg></a>
+                                    <a href="https://www.youtube.com/@FinalFinalStudios" target="_blank" rel="noopener noreferrer" aria-label="YouTube" style="color:rgba(255,255,255,0.6); transition:color 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" fill="currentColor" viewBox="0 0 576 512"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg></a>
+                                </div>
+                                <a href="mailto:hello@finalfinalstudios.com" style="font-size:14px; color:rgba(255,255,255,0.6); text-decoration:none; transition:color 0.2s;">hello@finalfinalstudios.com</a>
+                                <!-- <a class="newsletter-btn" href="mailto:hello@finalfinalstudios.com?subject=Newsletter%20Signup&body=I%27d%20like%20to%20sign%20up%20for%20the%20Final%20Final%20Studios%20newsletter!" style="display:inline-flex; align-items:center; gap:8px; padding:10px 24px; text-decoration:none; font-size:14px; font-weight:500; border-radius:4px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 512 512"><path d="M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48H48zM0 176V384c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V176L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z"/></svg>Newsletter Signup</a> -->
+                            </div>
                         </div>
-                        <!-- Copyright -->
-                        <p style="width:100%; text-align:center; font-size:12px; color:rgba(255,255,255,0.5); margin:20px 0 0;">&copy;2026 Final Final Studios LLC</p>
+                    </div>
+                    <!-- Copyright -->
+                    <div style="background-color:#111; padding:16px 0;">
+                        <p style="text-align:center; font-size:12px; color:rgba(255,255,255,0.5); margin:0;">&copy;2026 Final Final Studios LLC</p>
                     </div>
                 </footer>
 
