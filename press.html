@@ -17,9 +17,11 @@
         <meta property="og:description" content="Press information for Final Final Studios. Studio info, game catalog, and brand assets for media inquiries." />
         <meta property="og:image" content="https://finalfinalstudios.com/assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-005.jpg" />
         <meta property="og:url" content="https://finalfinalstudios.com/press.html" />
+        <meta property="og:site_name" content="Final Final Studios" />
 
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@finalfinalst" />
         <meta name="twitter:title" content="Press — Final Final Studios" />
         <meta name="twitter:description" content="Press information for Final Final Studios. Studio info, game catalog, and brand assets for media inquiries." />
         <meta name="twitter:image" content="https://finalfinalstudios.com/assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-005.jpg" />
@@ -61,9 +63,8 @@
             #masthead #site-branding { line-height: 0 !important; margin: 0 !important; padding: 0 !important; }
             #masthead.site-header.standard #site-navigation .menu > li { padding: 0 4px !important; display: inline-flex !important; align-items: center !important; height: auto !important; }
             #masthead.site-header.standard #site-navigation .menu > li > a { line-height: 1 !important; }
-            /* Always keep inline nav visible at all sizes */
-            #masthead.site-header:not(.hamburger-side) #site-navigation,
-            #masthead.site-header #site-navigation {
+            /* Nav - desktop: inline, mobile: stacked rows */
+            #masthead #site-navigation {
                 position: static !important;
                 opacity: 1 !important;
                 visibility: visible !important;
@@ -87,6 +88,24 @@
             #masthead #site-navigation .menu > li > a:hover {
                 color: #c14539 !important;
                 background-color: rgba(0,0,0,0.06) !important;
+            }
+            @media (max-width: 480px) {
+                #masthead.site-header.standard,
+                #masthead.site-header.standard.stuck,
+                #masthead.site-header.standard.is-stuck {
+                    height: auto !important;
+                    max-height: none !important;
+                    overflow: visible !important;
+                }
+                #masthead .container {
+                    flex-direction: column !important;
+                    height: auto !important;
+                    padding: 10px 0 !important;
+                    gap: 4px;
+                }
+                #masthead #site-navigation {
+                    margin-left: 0 !important;
+                }
             }
 
             a.steam-demo-btn,
@@ -132,7 +151,7 @@
                 z-index: 1;
                 font-family: 'Work Sans', sans-serif;
                 font-size: clamp(40px, 7vw, 72px);
-                font-weight: 700;
+                font-weight: 500;
                 color: #fff;
                 letter-spacing: 4px;
                 text-transform: uppercase;
@@ -231,15 +250,6 @@
                     height: 80px;
                 }
             }
-            .press-asset-preview-dark {
-                background: #1a1a1a;
-                padding: 16px 24px;
-                border-radius: 8px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
             /* Key Art grid */
             .press-keyart-grid {
                 display: grid;
@@ -281,6 +291,56 @@
                 opacity: 0.85;
             }
 
+            /* Lightbox */
+            .press-asset-preview { cursor: pointer; }
+            .press-keyart-item img { cursor: pointer; }
+            .screenshot-lightbox {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                z-index: 9999;
+                background: rgba(0,0,0,0.9);
+                align-items: center;
+                justify-content: center;
+            }
+            .screenshot-lightbox.active {
+                display: flex;
+            }
+            .screenshot-lightbox img {
+                max-width: 92vw;
+                max-height: 90vh;
+                border-radius: 6px;
+            }
+            .screenshot-lightbox img.lightbox-logo {
+                max-width: min(800px, 88vw);
+                max-height: 70vh;
+                background: #e8e8e8;
+                padding: 60px 80px;
+                border-radius: 12px;
+                object-fit: contain;
+            }
+            .screenshot-lightbox-close {
+                position: absolute;
+                top: 20px;
+                right: 24px;
+                width: 40px;
+                height: 40px;
+                background: rgba(255,255,255,0.15);
+                border: none;
+                border-radius: 50%;
+                color: #fff;
+                font-size: 24px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                line-height: 1;
+                transition: background 0.2s;
+            }
+            .screenshot-lightbox-close:hover {
+                background: rgba(255,255,255,0.3);
+            }
+
             /* Team list */
             .press-team-list {
                 display: flex;
@@ -310,17 +370,52 @@
             #footer .footer-social a:hover {
                 color: rgba(255,255,255,1) !important;
             }
-            #footer a[href^="mailto"]:not(.newsletter-btn):hover {
+            #footer a[href^="mailto"]:hover {
                 color: rgba(255,255,255,1) !important;
             }
-            .newsletter-btn {
-                background-color: #c14539 !important;
-                color: #fff !important;
-                transition: background-color 0.25s, color 0.25s !important;
+            .newsletter-form {
+                display: flex;
+                gap: 0;
+                max-width: 320px;
+                margin-left: auto;
             }
-            .newsletter-btn:hover {
-                background-color: #fff !important;
-                color: #111 !important;
+            .newsletter-form input {
+                flex: 1;
+                padding: 10px 14px;
+                font-size: 14px;
+                border: 1px solid rgba(255,255,255,0.15);
+                border-right: none;
+                border-radius: 4px 0 0 4px;
+                background: rgba(255,255,255,0.08);
+                color: #fff;
+                outline: none;
+                font-family: 'Work Sans', sans-serif;
+            }
+            .newsletter-form input::placeholder {
+                color: rgba(255,255,255,0.4);
+            }
+            .newsletter-form input:focus {
+                border-color: rgba(255,255,255,0.3);
+                background: rgba(255,255,255,0.12);
+            }
+            .newsletter-form button {
+                padding: 10px 18px;
+                font-size: 14px;
+                font-weight: 500;
+                font-family: 'Work Sans', sans-serif;
+                border: none;
+                border-radius: 0 4px 4px 0;
+                background: #c14539;
+                color: #fff;
+                cursor: pointer;
+                transition: background-color 0.25s, color 0.25s;
+                white-space: nowrap;
+                text-transform: none;
+                letter-spacing: 0;
+            }
+            .newsletter-form button:hover {
+                background-color: #fff;
+                color: #111;
             }
 
             @media (max-width: 600px) {
@@ -333,6 +428,22 @@
                 .press-asset-row {
                     flex-direction: column;
                     align-items: flex-start;
+                }
+                .footer-inner {
+                    justify-content: center !important;
+                }
+                .footer-left,
+                .footer-right {
+                    align-items: center !important;
+                    margin-left: 0 !important;
+                    width: 100%;
+                }
+                .footer-left nav {
+                    align-items: center;
+                }
+                .newsletter-form {
+                    margin-left: auto;
+                    margin-right: auto;
                 }
             }
         </style>
@@ -348,8 +459,8 @@
                 <div class="container">
                     <div id="site-branding">
                         <a class="logo-brand h3" style="color:#fdb83e;" href="index.html">
-                            <img class="logo" src="assets/images/logo/Logo_Long-Transparent.png" alt="Logo">
-                            <img class="retina-logo" src="assets/images/logo/Logo_FFS-TransparentSmall.png" alt="Logo Small">
+                            <img class="logo" src="assets/images/logo/Logo_Long-Transparent.png" alt="Final Final Studios">
+                            <img class="retina-logo" src="assets/images/logo/Logo_FFS-TransparentSmall.png" alt="Final Final Studios">
                         </a>
                     </div><!-- .site-branding -->
                     <nav id="site-navigation" class="main-navigation" role="navigation" aria-label="Top Menu">
@@ -409,10 +520,10 @@
 
                                                 <h3 style="font-family:'Work Sans', sans-serif; font-size:15px; font-weight:500; color:#333; margin:0 0 16px;">Logos</h3>
                                                 <div class="press-asset-row" style="flex-wrap:wrap; gap:24px;">
-                                                    <img class="press-asset-preview" src="assets/images/art/FinalFinalStudios-ImmortalsWayLogo-001.png" alt="Immortal's Way Logo">
-                                                    <img class="press-asset-preview" src="assets/images/art/FinalFinalStudios-ImmortalsWayLogo-002.png" alt="Immortal's Way Logo Alt">
-                                                    <img class="press-asset-preview" src="assets/images/logo/Logo_Long-Transparent.png" alt="Final Final Studios Logo (Long)">
-                                                    <img class="press-asset-preview" src="assets/images/logo/Logo_FFS-TransparentSmall.png" alt="Final Final Studios Logo (Small)">
+                                                    <img class="press-asset-preview" src="assets/images/art/FinalFinalStudios-ImmortalsWayLogo-001.png" alt="Immortal's Way Logo" loading="lazy">
+                                                    <img class="press-asset-preview" src="assets/images/art/FinalFinalStudios-ImmortalsWayLogo-002.png" alt="Immortal's Way Logo Alt" loading="lazy">
+                                                    <img class="press-asset-preview" src="assets/images/logo/Logo_Long-Transparent.png" alt="Final Final Studios Logo (Long)" loading="lazy">
+                                                    <img class="press-asset-preview" src="assets/images/logo/Logo_FFS-TransparentSmall.png" alt="Final Final Studios Logo (Small)" loading="lazy">
                                                 </div>
 
                                                 <h3 style="font-family:'Work Sans', sans-serif; font-size:15px; font-weight:500; color:#333; margin:32px 0 16px;">Colors</h3>
@@ -452,43 +563,43 @@
                                                 <h2>Key Art</h2>
                                                 <div class="press-keyart-grid">
                                                     <div class="press-keyart-item">
-                                                        <img src="assets/images/art/SteamCapsule-ImmortalsWay_Header Capsule + Library Header 920x430.png" alt="Header Capsule + Library Header">
+                                                        <img src="assets/images/art/SteamCapsule-ImmortalsWay_Header-Capsule-Library-Header-920x430.png" alt="Header Capsule + Library Header" loading="lazy">
                                                         <span>920&times;430</span>
                                                     </div>
                                                     <div class="press-keyart-item">
-                                                        <img src="assets/images/art/SteamCapsule-ImmortalsWay_Library Capsule 600x900.png" alt="Library Capsule">
+                                                        <img src="assets/images/art/SteamCapsule-ImmortalsWay_Library-Capsule-600x900.png" alt="Library Capsule" loading="lazy">
                                                         <span>600&times;900</span>
                                                     </div>
                                                     <div class="press-keyart-item">
-                                                        <img src="assets/images/art/SteamCapsule-ImmortalsWay_Library Hero 3840x1240.png" alt="Library Hero">
+                                                        <img src="assets/images/art/SteamCapsule-ImmortalsWay_Library-Hero-3840x1240.png" alt="Library Hero" loading="lazy">
                                                         <span>3840&times;1240</span>
                                                     </div>
                                                     <div class="press-keyart-item">
-                                                        <img src="assets/images/art/SteamCapsule-ImmortalsWay_Main Capsule 1232x706.png" alt="Main Capsule">
+                                                        <img src="assets/images/art/SteamCapsule-ImmortalsWay_Main-Capsule-1232x706.png" alt="Main Capsule" loading="lazy">
                                                         <span>1232&times;706</span>
                                                     </div>
                                                     <div class="press-keyart-item">
-                                                        <img src="assets/images/art/SteamCapsule-ImmortalsWay_Small Capsule 462x174.png" alt="Small Capsule">
+                                                        <img src="assets/images/art/SteamCapsule-ImmortalsWay_Small-Capsule-462x174.png" alt="Small Capsule" loading="lazy">
                                                         <span>462&times;174</span>
                                                     </div>
                                                     <div class="press-keyart-item">
-                                                        <img src="assets/images/art/SteamCapsule-ImmortalsWay_Vertical Capsule 748x896.png" alt="Vertical Capsule">
+                                                        <img src="assets/images/art/SteamCapsule-ImmortalsWay_Vertical-Capsule-748x896.png" alt="Vertical Capsule" loading="lazy">
                                                         <span>748&times;896</span>
                                                     </div>
                                                     <div class="press-keyart-item">
-                                                        <img src="assets/images/art/FinalFinalStudios-Texture-001.jpg" alt="Texture">
+                                                        <img src="assets/images/art/FinalFinalStudios-Texture-001.jpg" alt="Texture" loading="lazy">
                                                         <span>1536&times;1024</span>
                                                     </div>
                                                     <div class="press-keyart-item">
-                                                        <img src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-005.png" alt="Art 005">
+                                                        <img src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-005.png" alt="Art 005" loading="lazy">
                                                         <span>4497&times;2999</span>
                                                     </div>
                                                     <div class="press-keyart-item">
-                                                        <img src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-006.png" alt="Art 006">
+                                                        <img src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-006.png" alt="Art 006" loading="lazy">
                                                         <span>5565&times;3711</span>
                                                     </div>
                                                     <div class="press-keyart-item">
-                                                        <img src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-004.png" alt="Art 004">
+                                                        <img src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-004.png" alt="Art 004" loading="lazy">
                                                         <span>1536&times;1024</span>
                                                     </div>
                                                 </div>
@@ -498,41 +609,41 @@
                                             <div class="press-section">
                                                 <h2>Screenshots</h2>
                                                 <div class="press-screenshot-grid">
-                                                    <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-001.jpg" alt="Immortal's Way screenshot 1">
-                                                    <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-002.jpg" alt="Immortal's Way screenshot 2">
-                                                    <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-003.jpg" alt="Immortal's Way screenshot 3">
-                                                    <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-004.jpg" alt="Immortal's Way screenshot 4">
-                                                    <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-005.jpg" alt="Immortal's Way screenshot 5">
-                                                    <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-006.jpg" alt="Immortal's Way screenshot 6">
+                                                    <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-001.jpg" alt="Immortal's Way screenshot 1" loading="lazy">
+                                                    <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-002.jpg" alt="Immortal's Way screenshot 2" loading="lazy">
+                                                    <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-003.jpg" alt="Immortal's Way screenshot 3" loading="lazy">
+                                                    <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-004.jpg" alt="Immortal's Way screenshot 4" loading="lazy">
+                                                    <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-005.jpg" alt="Immortal's Way screenshot 5" loading="lazy">
+                                                    <img src="assets/images/art/FinalFinalStudios-ImmortalsWayScreenshot-006.jpg" alt="Immortal's Way screenshot 6" loading="lazy">
                                                 </div>
                                             </div>
 
                                             <!-- Pitch -->
                                             <div class="press-section">
                                                 <h2>Pitch</h2>
-                                                <p><strong>Immortal's Way</strong> is a boss-focused action game inspired by Chinese mythology. You play as a little rabbit on a big adventure to the Isle of Penglai, facing 12 legendary guardians drawn from the Shanhaijing. Every encounter is a boss fight &mdash; no filler, no grinding.</p>
+                                                <p>One small rabbit. Twelve ancient guardians. Immortal's Way is a boss-focused action game rooted in Chinese mythology. Study their patterns, strike with precision, and explore Penglai, the Isle of Immortals.</p>
                                                 <h3 style="font-family:'Work Sans', sans-serif; font-size:15px; font-weight:500; color:#333; margin:32px 0 16px;">Key Features</h3>
                                                 <ul style="list-style:disc; padding-left:20px; margin:0; display:flex; flex-direction:column; gap:8px;">
-                                                    <li style="font-size:15px; color:#555; line-height:1.6;"><strong>12 unique bosses</strong> drawn from the Shanhaijing &mdash; the Four Evils, the Dragon Kings, and the Gods of Mt. Kunlun.</li>
-                                                    <li style="font-size:15px; color:#555; line-height:1.6;"><strong>Combat as puzzle:</strong> Every encounter demands observation, pattern recognition, and precise execution.</li>
-                                                    <li style="font-size:15px; color:#555; line-height:1.6;"><strong>An island of secrets:</strong> Explore the sacred Isle of Immortals, uncovering ruins, shrines, and echoes of ancient myth.</li>
-                                                    <li style="font-size:15px; color:#555; line-height:1.6;"><strong>Ink wash art style:</strong> Every frame rendered as a living Chinese brush painting.</li>
-                                                    <li style="font-size:15px; color:#555; line-height:1.6;"><strong>Challenge Mode &amp; Leaderboards:</strong> Boss variants, mastery runs, and global rankings for players who chase perfection.</li>
+                                                    <li style="font-size:15px; color:#555; line-height:1.6;"><span style="font-weight:500">12 unique bosses</span> drawn from the Shanhaijing &mdash; the Four Evils, the Dragon Kings, and the Gods of Mt. Kunlun.</li>
+                                                    <li style="font-size:15px; color:#555; line-height:1.6;"><span style="font-weight:500">Combat as puzzle:</span> Every encounter demands observation, pattern recognition, and precise execution.</li>
+                                                    <li style="font-size:15px; color:#555; line-height:1.6;"><span style="font-weight:500">An island of secrets:</span> Explore the sacred Isle of Immortals, uncovering ruins, shrines, and echoes of ancient myth.</li>
+                                                    <li style="font-size:15px; color:#555; line-height:1.6;"><span style="font-weight:500">Ink wash art style:</span> Every frame rendered as a living Chinese brush painting.</li>
+                                                    <li style="font-size:15px; color:#555; line-height:1.6;"><span style="font-weight:500">Challenge Mode &amp; Leaderboards:</span> Boss variants, mastery runs, and global rankings for players who chase perfection.</li>
                                                 </ul>
                                             </div>
 
                                             <!-- Developer -->
                                             <div class="press-section">
                                                 <h2>Developer</h2>
-                                                <p><strong>Final Final Studios</strong> is a 2-person indie game studio based in California, USA. Our team has shipped multiple successful titles (Rock Band, Fantasia: Music Evolved, Black Hat Cooperative). The team brings 26+ years of combined industry experience from Google, Harmonix, and MIT Game Lab.</p>
+                                                <p><span style="font-weight:500">Final Final Studios</span> is a 2-person indie game studio based in California, USA. Our team has shipped multiple successful titles (Rock Band, Fantasia: Music Evolved, Black Hat Cooperative). The team brings 26+ years of combined industry experience from Google, Harmonix, and MIT Game Lab.</p>
                                             </div>
 
                                             <!-- Team -->
                                             <div class="press-section">
                                                 <h2>Team</h2>
                                                 <div class="press-team-list">
-                                                    <p><strong>Mark Sullivan</strong> &mdash; <em>Programmer, Co-Founder</em></p>
-                                                    <p><strong>Xin Xin</strong> &mdash; <em>Artist, Designer, Co-Founder</em></p>
+                                                    <p><span style="font-weight:500">Mark Sullivan</span> &mdash; <em>Co-Founder, Programmer</em></p>
+                                                    <p><span style="font-weight:500">Xin Xin</span> &mdash; <em>Co-Founder, Artist, Designer</em></p>
                                                 </div>
                                             </div>
 
@@ -558,9 +669,9 @@
 
                 <footer id="footer" class="site-footer" role="contentinfo" style="background-color:#111; border-top:none; margin:0; padding:0;">
                     <div style="background-color:#1a1a1a; padding:60px 0 40px;">
-                        <div class="container" style="display:flex; justify-content:space-between; align-items:flex-start; gap:40px; max-width:900px; margin:0 auto; flex-wrap:wrap;">
+                        <div class="footer-inner container" style="display:flex; justify-content:space-between; align-items:flex-start; gap:40px; max-width:900px; margin:0 auto; flex-wrap:wrap;">
                             <!-- Left Column -->
-                            <div style="display:flex; flex-direction:column; gap:14px;">
+                            <div class="footer-left" style="display:flex; flex-direction:column; gap:14px;">
                                 <img src="assets/images/logo/Logo_FFS-TransparentWhiteSmall.png" alt="Final Final Studios" style="width:60px;">
                                 <nav style="display:flex; flex-direction:column; gap:8px;">
                                     <a href="index.html" style="font-size:14px; color:rgba(255,255,255,0.6); text-decoration:none; transition:color 0.2s;">Games</a>
@@ -569,7 +680,7 @@
                                 </nav>
                             </div>
                             <!-- Right Column -->
-                            <div style="display:flex; flex-direction:column; gap:16px; align-items:flex-end; margin-left:auto;">
+                            <div class="footer-right" style="display:flex; flex-direction:column; gap:16px; align-items:flex-end; margin-left:auto;">
                                 <div class="footer-social" style="display:flex; align-items:center; gap:16px;">
                                     <a href="https://twitter.com/finalfinalst" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)" style="color:rgba(255,255,255,0.6); transition:color 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 512 512"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8l164.9-188.5L26.8 48h145.6l100.5 132.9L389.2 48zm-24.8 373.8h39.1L151.1 88h-42L364.4 421.8z"/></svg></a>
                                     <a href="https://bsky.app/profile/finalfinalstudios.bsky.social" target="_blank" rel="noopener noreferrer" aria-label="Bluesky" style="color:rgba(255,255,255,0.6); transition:color 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 568 501"><path d="M123.121 33.664C188.241 82.553 258.281 181.68 284 234.873c25.719-53.192 95.759-152.32 160.879-201.21C491.866-1.611 568-28.906 568 57.947c0 17.346-9.945 145.713-15.778 166.555-20.275 72.453-94.155 90.933-159.875 79.748C507.222 323.8 536.444 388.56 473.333 453.32c-119.86 122.992-172.272-30.859-185.702-70.281-2.462-7.227-3.614-10.608-3.631-7.733-.017-2.875-1.169.506-3.631 7.733-13.43 39.422-65.842 193.273-185.702 70.281-63.111-64.76-33.89-129.52 80.986-149.071-65.72 11.185-139.6-7.295-159.875-79.748C10.945 203.659 1 75.291 1 57.946 1-28.906 76.135-1.612 123.121 33.664z"/></svg></a>
@@ -577,7 +688,11 @@
                                     <a href="https://www.youtube.com/@FinalFinalStudios" target="_blank" rel="noopener noreferrer" aria-label="YouTube" style="color:rgba(255,255,255,0.6); transition:color 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" fill="currentColor" viewBox="0 0 576 512"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg></a>
                                 </div>
                                 <a href="mailto:hello@finalfinalstudios.com" style="font-size:14px; color:rgba(255,255,255,0.6); text-decoration:none; transition:color 0.2s;">hello@finalfinalstudios.com</a>
-                                <!-- <a class="newsletter-btn" href="mailto:hello@finalfinalstudios.com?subject=Newsletter%20Signup&body=I%27d%20like%20to%20sign%20up%20for%20the%20Final%20Final%20Studios%20newsletter!" style="display:inline-block; padding:10px 24px; text-decoration:none; font-size:14px; font-weight:500; border-radius:4px;">Newsletter Signup</a> -->
+                                <form action="https://app.kit.com/forms/9124901/subscriptions" method="post" class="newsletter-form" target="_blank">
+                                    <input type="email" name="email_address" placeholder="Your email" required>
+                                    <button type="submit">Subscribe</button>
+                                </form>
+                                <p style="font-size:12px; color:rgba(255,255,255,0.4); margin:-10px 0 0;">Stay up to date with our newsletter</p>
                             </div>
                         </div>
                     </div>
@@ -589,6 +704,57 @@
 
         </div>
         <!-- Page Wrapper Ends -->
+
+        <!-- Lightbox -->
+        <div class="screenshot-lightbox" id="screenshotLightbox">
+            <button class="screenshot-lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+            <img src="data:," alt="Screenshot" id="lightboxImg">
+        </div>
+
+        <script>
+        (function() {
+            var lightbox = document.getElementById('screenshotLightbox');
+            var lightboxImg = document.getElementById('lightboxImg');
+            var lightboxClose = document.getElementById('lightboxClose');
+
+            function openLightbox(src, alt, isLogo) {
+                lightboxImg.src = src;
+                lightboxImg.alt = alt || '';
+                if (isLogo) {
+                    lightboxImg.classList.add('lightbox-logo');
+                } else {
+                    lightboxImg.classList.remove('lightbox-logo');
+                }
+                lightbox.classList.add('active');
+            }
+            function closeLightbox() {
+                lightbox.classList.remove('active');
+                lightboxImg.src = '';
+                lightboxImg.classList.remove('lightbox-logo');
+            }
+
+            // Screenshots
+            document.querySelectorAll('.press-screenshot-grid img').forEach(function(img) {
+                img.addEventListener('click', function() { openLightbox(this.src, this.alt); });
+            });
+            // Key Art
+            document.querySelectorAll('.press-keyart-item img').forEach(function(img) {
+                img.addEventListener('click', function() { openLightbox(this.src, this.alt); });
+            });
+            // Logos
+            document.querySelectorAll('.press-asset-preview').forEach(function(img) {
+                img.addEventListener('click', function() { openLightbox(this.src, this.alt, true); });
+            });
+
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', function(e) {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeLightbox();
+            });
+        })();
+        </script>
 
         <!--  Scripts -->
         <script type='text/javascript' src='assets/js/vendor/jquery-1.12.4.min.js'></script>
