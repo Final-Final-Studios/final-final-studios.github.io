@@ -193,6 +193,10 @@
                 text-align: center;
                 padding: 8px 0 10px;
             }
+            .event-logos-bar .gdc-logo { height: 48px; width: auto; opacity: 0.85; }
+            @media (max-width: 768px) {
+                .event-logos-bar .gdc-logo { height: 32px; }
+            }
             .hero-center-block {
                 position: absolute;
                 top: 12%;
@@ -600,10 +604,11 @@
                                         </div>
                                         <!-- Event Logos -->
                                         <div class="event-logos-bar">
-                                            <div class="container" style="max-width:900px;">
+                                            <div class="container" style="max-width:900px; display:flex; align-items:center; justify-content:center; gap:24px; flex-wrap:wrap;">
+                                                <img class="gdc-logo" src="assets/images/logo/Logo-GDC.png" alt="GDC">
                                                 <picture>
-                                                    <source type="image/webp" srcset="assets/images/webp/FinalFinalStudios-EventLogos-001-480w.webp 480w, assets/images/webp/FinalFinalStudios-EventLogos-001-768w.webp 768w, assets/images/webp/FinalFinalStudios-EventLogos-001-1200w.webp 1200w" sizes="(max-width: 500px) 100vw, 500px">
-                                                    <img src="assets/images/art/FinalFinalStudios-EventLogos-001.png" alt="Featured at GDC, PAX West, Devcom, and Tokyo Game Show" style="width:100%; max-width:500px; height:auto;">
+                                                    <source type="image/webp" srcset="assets/images/webp/FinalFinalStudios-EventLogos-002-480w.webp 480w, assets/images/webp/FinalFinalStudios-EventLogos-002-768w.webp 768w, assets/images/webp/FinalFinalStudios-EventLogos-002-1200w.webp 1200w" sizes="(max-width: 400px) 80vw, 400px">
+                                                    <img src="assets/images/art/FinalFinalStudios-EventLogos-002.png" alt="Featured at Devcom, BostonFIG, and Capital Creative Showcase" style="max-width:400px; width:100%; height:auto;">
                                                 </picture>
                                             </div>
                                         </div>
