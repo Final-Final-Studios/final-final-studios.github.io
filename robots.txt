@@ -4,6 +4,9 @@ Allow: /
 # Sitemap
 Sitemap: https://finalfinalstudios.com/sitemap.xml
 
+# Private pitch page (not for public indexing)
+Disallow: /immortalsway.html
+
 # Disallow build/game artifacts (not useful for search)
 Disallow: /ImmortalsWay/WebGL/Build/
 Disallow: /FuguFury/WebGL/Build/
