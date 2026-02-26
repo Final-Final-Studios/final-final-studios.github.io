@@ -55,8 +55,13 @@
                 padding: 0 !important;
                 height: 60px !important;
             }
-            #masthead .logo { display: none !important; }
-            #masthead .retina-logo { display: inline-block !important; max-height: 28px !important; }
+            #masthead.site-header #site-branding .logo { display: none !important; }
+            #masthead.site-header #site-branding .retina-logo { display: inline-block !important; max-height: 28px !important; }
+            #masthead.site-header #site-branding .logo-long { display: none !important; max-height: 28px !important; width: auto !important; }
+            @media (min-width: 768px) {
+                #masthead.site-header #site-branding .logo-long { display: inline-block !important; }
+                #masthead.site-header #site-branding .retina-logo { display: none !important; }
+            }
             #masthead .main-navigation a { font-weight: 500 !important; }
             #masthead .container { display: flex !important; align-items: center !important; justify-content: space-between !important; height: 60px !important; }
             #masthead #site-branding a { padding: 0 !important; margin: 0 !important; display: flex !important; align-items: center !important; line-height: 1 !important; }
@@ -111,6 +116,10 @@
                 }
                 #masthead #site-navigation {
                     margin-left: 0 !important;
+                }
+                .entry-content > div:first-child {
+                    padding-top: 172px !important;
+                    padding-bottom: 40px !important;
                 }
             }
             .experience-logos {
@@ -243,6 +252,7 @@
                     <div id="site-branding">
                         <a class="logo-brand h3" style="color:#E8C547;" href="index.html">
                             <img class="retina-logo" src="assets/images/webp/Logo_FFS-TransparentSmall.webp" alt="Final Final Studios" width="170" height="60">
+                            <img class="logo-long" src="assets/images/webp/Logo_Long-Transparent.webp" alt="Final Final Studios" height="60">
                         </a>
                     </div><!-- .site-branding -->
                     <nav id="site-navigation" class="main-navigation" role="navigation" aria-label="Top Menu">
@@ -263,7 +273,7 @@
                                 <div class="entry-content">
 
                                     <!-- Hero Banner -->
-                                    <div style="position:relative; overflow:hidden; background-image:url('assets/images/webp/FinalFinalStudios-Texture-002.webp'); background-repeat:repeat; background-size:256px; padding:clamp(160px, 18vw, 220px) 20px clamp(60px, 7vw, 80px); text-align:center; margin-top:-60px;">
+                                    <div style="position:relative; overflow:hidden; background-image:url('assets/images/webp/FinalFinalStudios-Texture-002.webp'); background-repeat:repeat; background-size:256px; padding:clamp(160px, 18vw, 220px) 20px clamp(40px, calc(18vw - 120px), 100px); text-align:center; margin-top:-60px;">
                                         <img src="assets/images/art/FinalFinalStudios-ImmortalsWayArt-002.png" alt="" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:80%; height:auto; mix-blend-mode:multiply; opacity:0.15; pointer-events:none;">
                                         <div style="position:relative; z-index:1; max-width:700px; margin:0 auto;">
                                             <h1 style="font-family:'Work Sans', sans-serif; font-size:clamp(22px, 3.5vw, 36px); font-weight:500; color:#111; line-height:1.4; margin:0 0 16px;">We are a 2-person indie game studio with 26+ years of combined industry experience and 11 shipped games.</h1>

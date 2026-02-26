@@ -103,8 +103,13 @@
                 padding: 0 !important;
                 height: 60px !important;
             }
-            #masthead .logo { display: none !important; }
-            #masthead .retina-logo { display: inline-block !important; max-height: 28px !important; }
+            #masthead.site-header #site-branding .logo { display: none !important; }
+            #masthead.site-header #site-branding .retina-logo { display: inline-block !important; max-height: 28px !important; }
+            #masthead.site-header #site-branding .logo-long { display: none !important; max-height: 28px !important; width: auto !important; }
+            @media (min-width: 768px) {
+                #masthead.site-header #site-branding .logo-long { display: inline-block !important; }
+                #masthead.site-header #site-branding .retina-logo { display: none !important; }
+            }
             #masthead .main-navigation a { font-weight: 500 !important; }
             #masthead .container { display: flex !important; align-items: center !important; justify-content: space-between !important; height: 60px !important; }
             #masthead #site-branding a { padding: 0 !important; margin: 0 !important; display: flex !important; align-items: center !important; line-height: 1 !important; }
@@ -252,6 +257,9 @@
             .hero-logo {
                 animation: breatheLogo 8s ease-in-out infinite;
                 animation-delay: -1s;
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
             }
 
             /* Mobile: stack other games columns + smaller lettering */
@@ -301,16 +309,16 @@
                 }
                 .hero-taotie {
                     width: auto !important;
-                    height: 55% !important;
-                    right: -20% !important;
-                    top: -25% !important;
+                    height: 80% !important;
+                    right: -18% !important;
+                    top: -10% !important;
                 }
                 .hero-rabbit {
                     width: auto !important;
-                    height: 75% !important;
+                    height: 100% !important;
                     max-width: none !important;
-                    left: -35% !important;
-                    bottom: -20% !important;
+                    left: -18% !important;
+                    bottom: -50% !important;
                 }
                 .hero-logo {
                     width: clamp(220px, 55vw, 300px) !important;
@@ -358,8 +366,14 @@
                     left: -4% !important;
                 }
                 .hero-logo {
-                    width: clamp(220px, 40%, 500px) !important;
+                    width: clamp(260px, 28vw, 400px) !important;
                     height: auto !important;
+                }
+            }
+            /* Very wide screens */
+            @media (min-width: 1500px) {
+                .hero-logo {
+                    width: clamp(340px, 26vw, 460px) !important;
                 }
             }
 
@@ -414,9 +428,10 @@
                 right: 24px;
                 width: 40px;
                 height: 40px;
+                padding: 0;
                 background: rgba(255,255,255,0.15);
                 border: none;
-                border-radius: 50%;
+                border-radius: 8px;
                 color: #fff;
                 font-size: 24px;
                 cursor: pointer;
@@ -525,11 +540,12 @@
                     <div id="site-branding">            
                         <a class="logo-brand h3" style="color:#E8C547;" href="index.html">
                             <img class="retina-logo" src="assets/images/webp/Logo_FFS-TransparentSmall.webp" alt="Final Final Studios" width="170" height="60">
+                            <img class="logo-long" src="assets/images/webp/Logo_Long-Transparent.webp" alt="Final Final Studios" height="60">
                         </a>
                     </div><!-- .site-branding -->
                     <nav id="site-navigation" class="main-navigation" role="navigation" aria-label="Top Menu">
                         <ul id="top-menu" class="menu">
-                            <li class=""><a href="index.html">Games</a></li>
+                            <li class=""><a href="#other-games">Games</a></li>
                             <li class=""><a href="about.html">Team</a></li>
                             <li class=""><a href="press.html">Press</a></li>
                         </ul>
@@ -569,12 +585,12 @@
                                                 <h1 style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;">Immortal's Way — A Boss-Focused Action Game by Final Final Studios</h1>
                                                 <picture>
                                                     <source type="image/webp" srcset="assets/images/webp/FinalFinalStudios-ImmortalsWayLogo-001-480w.webp 480w, assets/images/webp/FinalFinalStudios-ImmortalsWayLogo-001-768w.webp 768w, assets/images/webp/FinalFinalStudios-ImmortalsWayLogo-001-1200w.webp 1200w" sizes="(max-width: 768px) 260px, 50vw">
-                                                    <img class="hero-logo" src="assets/images/art/FinalFinalStudios-ImmortalsWayLogo-001.png" alt="Immortal's Way" style="width:clamp(260px, 50%, 540px); height:auto;" fetchpriority="high">
+                                                    <img class="hero-logo" src="assets/images/art/FinalFinalStudios-ImmortalsWayLogo-001.png" alt="Immortal's Way" style="width:clamp(220px, 30vw, 420px); height:auto;" fetchpriority="high">
                                                 </picture>
                                                 <div class="hero-tagline">
                                                     <span>Small rabbit vs 12 legendary guardians.<br>A boss-focused action game.</span>
                                                     <div style="margin-top:16px;">
-                                                        <a class="steam-demo-btn" href="https://store.steampowered.com/app/2986350/Immortals_Way/" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:8px; padding:8px 20px; border-radius:4px; text-decoration:none; font-family:'Work Sans', sans-serif; font-size:clamp(12px, 1.6vw, 15px); font-weight:500; letter-spacing:0.3px;">
+                                                        <a class="steam-demo-btn" href="https://store.steampowered.com/app/2986350/Immortals_Way/" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:8px; padding:8px 22px 8px 16px; border-radius:4px; text-decoration:none; font-family:'Work Sans', sans-serif; font-size:clamp(12px, 1.6vw, 15px); font-weight:500; letter-spacing:0.3px;">
                                                             <img src="assets/images/logo/Logo-Steam.png" alt="Steam" style="height:18px; width:auto;" width="32" height="18">
                                                             Steam Demo
                                                         </a>
@@ -638,7 +654,7 @@
                                             </div>
                                         </div>
                                         <div style="text-align:center; margin-top:24px;">
-                                            <a class="steam-demo-btn" href="https://store.steampowered.com/app/2986350/Immortals_Way/" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:8px; padding:10px 24px; border-radius:4px; text-decoration:none; font-family:'Work Sans', sans-serif; font-size:14px; font-weight:500; letter-spacing:0.3px;"><img src="assets/images/logo/Logo-Steam.png" alt="Steam" style="height:18px; width:auto;" width="32" height="18">Wishlist on Steam</a>
+                                            <a class="steam-demo-btn" href="https://store.steampowered.com/app/2986350/Immortals_Way/" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:8px; padding:10px 26px 10px 20px; border-radius:4px; text-decoration:none; font-family:'Work Sans', sans-serif; font-size:14px; font-weight:500; letter-spacing:0.3px;"><img src="assets/images/logo/Logo-Steam.png" alt="Steam" style="height:18px; width:auto;" width="32" height="18">Wishlist on Steam</a>
                                         </div>
                                     </div>
 
@@ -649,7 +665,7 @@
                                     </div>
 
                                     <!-- Other Games -->
-                                    <div style="padding:40px 0 60px; background:white; position:relative; z-index:1;">
+                                    <div id="other-games" style="padding:40px 0 60px; background:white; position:relative; z-index:1; scroll-margin-top:70px;">
                                         <div class="container" style="max-width:900px;">
                                             <div style="text-align:center; margin-bottom:32px;">
                                                 <picture>

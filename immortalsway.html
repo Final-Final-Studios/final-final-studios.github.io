@@ -102,8 +102,13 @@
                 padding: 0 !important;
                 height: 60px !important;
             }
-            #masthead .logo { display: none !important; }
-            #masthead .retina-logo { display: inline-block !important; max-height: 28px !important; }
+            #masthead.site-header #site-branding .logo { display: none !important; }
+            #masthead.site-header #site-branding .retina-logo { display: inline-block !important; max-height: 28px !important; }
+            #masthead.site-header #site-branding .logo-long { display: none !important; max-height: 28px !important; width: auto !important; }
+            @media (min-width: 768px) {
+                #masthead.site-header #site-branding .logo-long { display: inline-block !important; }
+                #masthead.site-header #site-branding .retina-logo { display: none !important; }
+            }
             #masthead .main-navigation a { font-weight: 500 !important; }
             #masthead .container { display: flex !important; align-items: center !important; justify-content: space-between !important; height: 60px !important; }
             #masthead #site-branding a { padding: 0 !important; margin: 0 !important; display: flex !important; align-items: center !important; line-height: 1 !important; }
@@ -256,39 +261,46 @@
                 color: #444;
                 margin: 0 0 20px;
             }
+            .iw-btn-group {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                align-items: center;
+            }
             .iw-btn {
                 display: inline-flex;
                 align-items: center;
                 gap: 8px;
                 padding: 10px 24px;
                 border-radius: 4px;
-                background: #E64538;
-                color: #fff;
+                background: transparent;
+                color: #111;
                 text-decoration: none;
                 font-size: 14px;
                 font-weight: 500;
                 font-family: 'Work Sans', sans-serif;
-                transition: background 0.25s, color 0.25s;
-                margin-right: 12px;
-                margin-bottom: 12px;
+                transition: background 0.25s, color 0.25s, border-color 0.25s;
+                border: 2px solid #111;
             }
             .iw-btn:hover {
-                background: #fff;
-                color: #111;
+                background: #111;
+                color: #fff;
+                border: 2px solid #111;
             }
             .iw-pitch-deck {
                 margin-top: 40px;
             }
-            .iw-pitch-deck h2 {
-                font-size: 20px;
-                font-weight: 500;
-                color: #111;
-                margin: 0 0 16px;
+            .iw-btn img {
+                transition: filter 0.25s;
+                filter: brightness(0);
+            }
+            .iw-btn:hover img {
+                filter: brightness(0) invert(1);
             }
             .embed-responsive {
                 position: relative;
                 width: 100%;
-                padding-bottom: 56.25%;
+                padding-bottom: 80%;
                 overflow: hidden;
                 border-radius: 6px;
             }
@@ -312,6 +324,7 @@
                     <div id="site-branding">
                         <a class="logo-brand h3" style="color:#E8C547;" href="index.html">
                             <img class="retina-logo" src="assets/images/webp/Logo_FFS-TransparentSmall.webp" alt="Final Final Studios" width="170" height="60">
+                            <img class="logo-long" src="assets/images/webp/Logo_Long-Transparent.webp" alt="Final Final Studios" height="60">
                         </a>
                     </div><!-- .site-branding -->
                     <nav id="site-navigation" class="main-navigation" role="navigation" aria-label="Top Menu">
@@ -334,15 +347,17 @@
                                     <div class="iw-content">
                                         <h1>Immortal's Way</h1>
                                         <p>One small rabbit. Twelve ancient guardians. Immortal's Way is a boss-focused action game rooted in Chinese mythology. Study their patterns, strike with precision, and explore Penglai, the Isle of Immortals.</p>
-                                        <div>
+                                        <div class="iw-btn-group">
                                             <a class="iw-btn" href="https://store.steampowered.com/app/2986350/Immortals_Way/" target="_blank" rel="noopener noreferrer">
-                                                <img src="assets/images/logo/Logo-Steam.png" alt="Steam" style="height:18px; width:auto;">
-                                                Wishlist on Steam
+                                                <img src="assets/images/logo/Logo-Steam.png" alt="Steam" style="height:18px; width:24px; object-fit:contain;">
+                                                Steam Demo
+                                            </a>
+                                            <a class="iw-btn" href="https://docs.google.com/presentation/d/1d7u1xY1gmLxeGhumsHzEu5maWGM56RNPcGxXFHCc3BU/edit" target="_blank" rel="noopener noreferrer">
+                                                Pitch Deck
                                             </a>
                                         </div>
 
                                         <div class="iw-pitch-deck">
-                                            <h2>Pitch Deck</h2>
                                             <div class="embed-responsive">
                                                 <iframe src="https://docs.google.com/presentation/d/e/2PACX-1vRg54UhGJXTY4qsv9Tb7srrIJsuSyt9kI17IMHuH0yt7nijpRcAWHafLGq847Oxq9tQsjNOHfwHZel8/pubembed?start=false&loop=false&delayms=60000" allowfullscreen="true"></iframe>
                                             </div>

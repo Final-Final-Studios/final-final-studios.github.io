@@ -82,6 +82,8 @@
         <link rel='stylesheet' id='main-css'  href='style.css' type='text/css' media='all' />
         <style>
             body { margin-top: 0 !important; }
+            .site-content { overflow: visible !important; }
+            body, #page { overflow-x: hidden; }
             #masthead.site-header.standard {
                 background-color: rgba(255,255,255,0.85) !important;
                 box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
@@ -99,8 +101,13 @@
                 padding: 0 !important;
                 height: 60px !important;
             }
-            #masthead .logo { display: none !important; }
-            #masthead .retina-logo { display: inline-block !important; max-height: 28px !important; }
+            #masthead.site-header #site-branding .logo { display: none !important; }
+            #masthead.site-header #site-branding .retina-logo { display: inline-block !important; max-height: 28px !important; }
+            #masthead.site-header #site-branding .logo-long { display: none !important; max-height: 28px !important; width: auto !important; }
+            @media (min-width: 768px) {
+                #masthead.site-header #site-branding .logo-long { display: inline-block !important; }
+                #masthead.site-header #site-branding .retina-logo { display: none !important; }
+            }
             #masthead .main-navigation a { font-weight: 500 !important; }
             #masthead .container { display: flex !important; align-items: center !important; justify-content: space-between !important; height: 60px !important; }
             #masthead #site-branding a { padding: 0 !important; margin: 0 !important; display: flex !important; align-items: center !important; line-height: 1 !important; }
@@ -177,6 +184,33 @@
             .press-hero .press-outline-btn:hover svg {
                 stroke: #111 !important;
             }
+            .press-hero-buttons > a {
+                justify-content: center;
+                text-align: center;
+                white-space: nowrap;
+            }
+
+            /* Press section shortcuts */
+            .press-shortcuts {
+                background: #f5f5f5;
+                border-bottom: 1px solid #e5e5e5;
+                padding: 12px 20px;
+            }
+            .press-shortcuts a {
+                font-family: 'Work Sans', sans-serif;
+                font-size: 13px;
+                font-weight: 500;
+                color: #555;
+                text-decoration: none;
+                transition: color 0.2s;
+                white-space: nowrap;
+            }
+            .press-shortcuts a:hover {
+                color: #E64538;
+            }
+            .press-section[id] {
+                scroll-margin-top: 70px;
+            }
 
             /* Press Kit Hero */
             .press-hero {
@@ -220,7 +254,7 @@
                 padding: 0 20px;
             }
             .press-section {
-                padding: 12px 0;
+                padding: 24px 0;
                 border-bottom: 1px solid #e5e5e5;
             }
             .press-section:last-child {
@@ -238,7 +272,7 @@
                 font-size: 14px;
                 color: #555;
                 line-height: 1.65;
-                margin: 0 0 12px;
+                margin: 0 0 4px;
             }
             .press-section p:last-child {
                 margin-bottom: 0;
@@ -256,7 +290,7 @@
                     gap: 0 40px;
                 }
                 .press-two-col > .press-section {
-                    padding: 16px 0;
+                    padding: 24px 0;
                 }
                 .press-full-width {
                     grid-column: 1 / -1;
@@ -341,8 +375,8 @@
             }
             @media (max-width: 600px) {
                 .press-asset-preview {
-                    flex: 1 1 100%;
-                    max-width: 200px;
+                    flex: 1 1 calc(50% - 12px);
+                    max-width: none;
                     height: 80px;
                 }
             }
@@ -421,9 +455,10 @@
                 right: 24px;
                 width: 40px;
                 height: 40px;
+                padding: 0;
                 background: rgba(255,255,255,0.15);
                 border: none;
-                border-radius: 50%;
+                border-radius: 8px;
                 color: #fff;
                 font-size: 24px;
                 cursor: pointer;
@@ -556,8 +591,9 @@
                     grid-template-columns: 1fr 1fr;
                 }
                 .press-asset-row {
-                    flex-direction: column;
-                    align-items: flex-start;
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    align-items: stretch;
                 }
                 .footer-inner {
                     justify-content: center !important;
@@ -590,6 +626,7 @@
                     <div id="site-branding">
                         <a class="logo-brand h3" style="color:#E8C547;" href="index.html">
                             <img class="retina-logo" src="assets/images/webp/Logo_FFS-TransparentSmall.webp" alt="Final Final Studios" width="170" height="60">
+                            <img class="logo-long" src="assets/images/webp/Logo_Long-Transparent.webp" alt="Final Final Studios" height="60">
                         </a>
                     </div><!-- .site-branding -->
                     <nav id="site-navigation" class="main-navigation" role="navigation" aria-label="Top Menu">
@@ -615,28 +652,40 @@
                                             <source type="image/webp" srcset="assets/images/webp/ImmortalsWay-Lettering-PressKit01.webp">
                                             <img src="assets/images/lettering/ImmortalsWay-Lettering-PressKit01.png" alt="Press Kit" style="position:relative; z-index:1; max-width:350px; width:60%; height:auto; filter:brightness(0) invert(1);">
                                         </picture>
-                                        <div style="position:relative; z-index:1; display:flex; gap:12px; margin-top:12px; flex-wrap:wrap; justify-content:center;">
-                                            <a class="steam-demo-btn" href="https://drive.google.com/open?id=1oOrlwYbcBzf0h4fXCL-CLh_uF4l8hfwB&usp=drive_fs" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:8px; padding:10px 24px; border-radius:4px; text-decoration:none; font-family:'Work Sans', sans-serif; font-size:14px; font-weight:500; letter-spacing:0.3px;">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16" viewBox="0 0 87.3 78" fill="none"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z" fill="#fff"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0-1.2 4.5h27.5z" fill="#fff"/><path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.95 10.3z" fill="#fff"/><path d="M43.65 25 57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#fff"/><path d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h32.6c1.6 0 3.15-.45 4.5-1.2z" fill="#fff"/><path d="M73.4 26.5 60.65 4.5c-.8-1.4-1.95-2.5-3.3-3.3L43.6 25l16.2 28h27.5c0-1.55-.4-3.1-1.2-4.5z" fill="#fff"/></svg>
+                                        <div class="press-hero-buttons" style="position:relative; z-index:1; display:flex; gap:12px; margin-top:12px; flex-wrap:nowrap; justify-content:center;">
+                                            <a class="press-outline-btn" href="https://drive.google.com/open?id=1oOrlwYbcBzf0h4fXCL-CLh_uF4l8hfwB&usp=drive_fs" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:8px; padding:10px 24px; border-radius:4px; text-decoration:none; font-family:'Work Sans', sans-serif; font-size:14px; font-weight:500; letter-spacing:0.3px; background:transparent; color:#fff; border:1.5px solid #fff; transition:background 0.2s, color 0.2s;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16" viewBox="0 0 87.3 78" fill="none"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z" fill="currentColor"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0-1.2 4.5h27.5z" fill="currentColor"/><path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.95 10.3z" fill="currentColor"/><path d="M43.65 25 57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="currentColor"/><path d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h32.6c1.6 0 3.15-.45 4.5-1.2z" fill="currentColor"/><path d="M73.4 26.5 60.65 4.5c-.8-1.4-1.95-2.5-3.3-3.3L43.6 25l16.2 28h27.5c0-1.55-.4-3.1-1.2-4.5z" fill="currentColor"/></svg>
                                                 Google Drive
                                             </a>
-                                            <a class="press-outline-btn" href="FinalFinalStudios-PressKit/PressKit-All.zip" download style="display:inline-flex; align-items:center; gap:8px; padding:10px 24px; border-radius:4px; text-decoration:none; font-family:'Work Sans', sans-serif; font-size:14px; font-weight:500; letter-spacing:0.3px; background:transparent; color:#fff; border:1.5px solid #fff; transition:background 0.2s, color 0.2s;">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                            <a class="press-outline-btn" href="https://drive.google.com/file/d/1nw2UUEY9pA43Kpu15qtWM1Pd4KbR_Vtx/view?usp=drive_link" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:8px; padding:10px 24px; border-radius:4px; text-decoration:none; font-family:'Work Sans', sans-serif; font-size:14px; font-weight:500; letter-spacing:0.3px; background:transparent; color:#fff; border:1.5px solid #fff; transition:background 0.2s, color 0.2s;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                                 Download All (ZIP)
                                             </a>
                                         </div>
                                     </div>
+
+                                    <!-- Section Shortcuts -->
+                                    <nav class="press-shortcuts" aria-label="Press kit sections">
+                                        <div class="press-content" style="display:flex; flex-wrap:wrap; justify-content:center; gap:6px 16px;">
+                                            <a href="#onepager">One Pager</a>
+                                            <a href="#branding">Branding</a>
+                                            <a href="#keyart">Key Art</a>
+                                            <a href="#screenshots">Screenshots</a>
+                                            <a href="#gifs">GIFs</a>
+                                            <a href="#videos">Videos</a>
+                                        </div>
+                                    </nav>
 
                                     <!-- Press Kit Body -->
                                     <div style="background:white; padding:32px 0 40px;">
                                         <div class="press-content">
 
                                             <!-- Top 2-col: Left (Quick Facts, Contact) / Right (About, Key Features) -->
-                                            <div class="press-two-col">
+                                            <div id="onepager" class="press-two-col" style="scroll-margin-top:70px;">
 
                                                 <!-- Left Column -->
                                                 <div>
-                                                    <div class="press-section" style="border-bottom:none;">
+                                                    <div id="contact" class="press-section" style="border-bottom:none;">
                                                         <h2>Contact</h2>
                                                         <p>For press inquiries: <a href="mailto:press@finalfinalstudios.com" style="color:#E64538; text-decoration:none; font-weight:500;">press@finalfinalstudios.com</a></p>
                                                         <p>For support: <a href="mailto:support@finalfinalstudios.com" style="color:#E64538; text-decoration:none; font-weight:500;">support@finalfinalstudios.com</a></p>
@@ -656,7 +705,7 @@
 
                                                     </div>
 
-                                                    <div class="press-section" style="border-bottom:none;">
+                                                    <div id="facts" class="press-section" style="border-bottom:none;">
                                                         <h2>Quick Facts</h2>
                                                         <table class="press-fact-table">
                                                             <tr><td>Developer</td><td>Final Final Studios LLC</td></tr>
@@ -686,12 +735,12 @@
 
                                                 <!-- Right Column -->
                                                 <div>
-                                                    <div class="press-section" style="border-bottom:none;">
+                                                    <div id="about" class="press-section" style="border-bottom:none;">
                                                         <h2>About the Game</h2>
                                                         <p>On the shores of Penglai, the Isle of Immortals, twelve legendary guardians stand between you and immortality. Every fight is a puzzle. Every death a lesson. Every encounter is a boss battle drawn from the Shanhaijing, China's ancient bestiary of myths and monsters. Some guardians demand vertical traversal. Others require manipulating the arena itself. Penglai comes to life through painterly ink-wash visuals inspired by traditional Chinese brush painting.</p>
                                                     </div>
 
-                                                    <div class="press-section">
+                                                    <div id="features" class="press-section">
                                                         <h2>Key Features</h2>
                                                         <ul class="press-feature-list">
                                                             <li><span>12 unique bosses:</span> The Four Evils, the Dragon Kings, and the Gods of Mt. Kunlun.</li>
@@ -702,7 +751,7 @@
                                                         </ul>
                                                     </div>
 
-                                                    <div class="press-section">
+                                                    <div id="studio" class="press-section">
                                                         <h2>Studio</h2>
                                                         <p>Final Final Studios LLC is an independent game development studio founded by Xin and Mark Sullivan, two industry veterans with a combined 26+ years of experience and 11 shipped games spanning Harmonix, Google, and the MIT Game Lab. The studio was established to create premium, tightly crafted indie games that pair deep mechanical design with bold artistic vision.</p>
                                                         <ul class="press-feature-list" style="margin-top:12px;">
@@ -727,7 +776,7 @@
                                             </div>
 
                                             <!-- Branding (full width, unchanged) -->
-                                            <div class="press-section">
+                                            <div id="branding" class="press-section">
                                                 <h2>Branding</h2>
 
                                                 <h3 style="font-family:'Work Sans', sans-serif; font-size:15px; font-weight:500; color:#333; margin:0 0 16px;">Logos</h3>
@@ -804,10 +853,10 @@
                                             </div>
 
                                             <!-- Key Art (full width) -->
-                                            <div class="press-section">
+                                            <div id="keyart" class="press-section">
                                                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                                                     <h2 style="margin:0;">Key Art</h2>
-                                                    <a href="FinalFinalStudios-PressKit/KeyArt.zip" download style="font-size:13px; color:#E64538; text-decoration:none; font-weight:500;">Download Key Art (ZIP)</a>
+                                                    <a href="https://drive.google.com/open?id=1IfWivrWPsgUP9Pr2Bt6mlWhy4v67vLlW&usp=drive_fs" target="_blank" rel="noopener noreferrer" style="font-size:13px; color:#E64538; text-decoration:none; font-weight:500;">Download Key Art (ZIP)</a>
                                                 </div>
                                                 <div class="press-keyart-grid">
                                                     <div class="press-keyart-item">
@@ -858,10 +907,10 @@
                                             </div>
 
                                             <!-- Screenshots (full width) -->
-                                            <div class="press-section">
+                                            <div id="screenshots" class="press-section">
                                                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                                                     <h2 style="margin:0;">Screenshots</h2>
-                                                    <a href="FinalFinalStudios-PressKit/Screenshots.zip" download style="font-size:13px; color:#E64538; text-decoration:none; font-weight:500;">Download Screenshots (ZIP)</a>
+                                                    <a href="https://drive.google.com/open?id=1UxdHLpp9GYzoD5EBhguYhJ0Xk-CDLehO&usp=drive_fs" target="_blank" rel="noopener noreferrer" style="font-size:13px; color:#E64538; text-decoration:none; font-weight:500;">Download Screenshots (ZIP)</a>
                                                 </div>
                                                 <div class="press-screenshot-grid">
                                                     <img src="FinalFinalStudios-PressKit/Screenshots/FinalFinalStudios-ImmortalsWay_Screenshot001_TaotieIntro.png" alt="Taotie Intro" loading="lazy">
@@ -884,10 +933,10 @@
                                             </div>
 
                                             <!-- GIFs (full width) -->
-                                            <div class="press-section">
+                                            <div id="gifs" class="press-section">
                                                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                                                     <h2 style="margin:0;">GIFs</h2>
-                                                    <a href="FinalFinalStudios-PressKit/GIFs.zip" download style="font-size:13px; color:#E64538; text-decoration:none; font-weight:500;">Download GIFs (ZIP)</a>
+                                                    <a href="https://drive.google.com/file/d/1qUa_mjCt4ZhNTBjMXZErNmZrX5CM7nHW/view?usp=drive_link" target="_blank" rel="noopener noreferrer" style="font-size:13px; color:#E64538; text-decoration:none; font-weight:500;">Download GIFs (ZIP)</a>
                                                 </div>
                                                 <div class="press-screenshot-grid">
                                                     <img src="FinalFinalStudios-PressKit/GIFs/FinalFinalStudios-ImmortalsWay_Gif001_TaotieIntro.gif" alt="Taotie Intro" loading="lazy">
@@ -910,10 +959,10 @@
                                             </div>
 
                                             <!-- Videos (full width) -->
-                                            <div class="press-section">
+                                            <div id="videos" class="press-section">
                                                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                                                     <h2 style="margin:0;">Videos</h2>
-                                                    <a href="FinalFinalStudios-PressKit/Videos.zip" download style="font-size:13px; color:#E64538; text-decoration:none; font-weight:500;">Download Videos (ZIP)</a>
+                                                    <a href="https://drive.google.com/open?id=1bped90-1Sr4N9H4JZgzz9rx6rhr0FDll&usp=drive_fs" target="_blank" rel="noopener noreferrer" style="font-size:13px; color:#E64538; text-decoration:none; font-weight:500;">Download Videos (ZIP)</a>
                                                 </div>
                                                 <div style="display:flex; flex-direction:column; gap:8px;">
                                                     <div style="display:flex; align-items:center; gap:12px; font-size:14px;">
