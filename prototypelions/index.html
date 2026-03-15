@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Immortal's Way — Lion Puzzle Prototype</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0b0f1c;
+  color: #c4b89a;
+  font-family: 'Courier New', monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  touch-action: manipulation;
+  min-height: 100vh;
+  padding: 10px 0;
+}
+#title {
+  color: #c13628;
+  font-size: 11px;
+  letter-spacing: 6px;
+  text-align: center;
+  margin-top: 8px;
+}
+#subtitle {
+  color: #2e3a50;
+  font-size: 10px;
+  text-align: center;
+  letter-spacing: 2px;
+  margin: 4px 0 8px 0;
+  line-height: 1.5;
+}
+#game-container {
+  position: relative;
+  display: inline-block;
+}
+canvas { display: block; }
+#overlay {
+  display: none;
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(10,13,22,0.93);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+#overlay-title {
+  color: #4aad8a;
+  font-size: 28px;
+  letter-spacing: 6px;
+  font-family: 'Courier New', monospace;
+}
+#overlay-sub {
+  color: #556070;
+  font-size: 11px;
+  letter-spacing: 3px;
+  margin: 12px 0 20px 0;
+  font-family: 'Courier New', monospace;
+}
+#retry-btn {
+  background: transparent;
+  border: 1px solid #c13628;
+  color: #c13628;
+  font-size: 11px;
+  letter-spacing: 4px;
+  font-family: 'Courier New', monospace;
+  padding: 8px 24px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+#retry-btn:hover { background: rgba(193,54,40,0.15); }
+#legend {
+  font-size: 10px;
+  color: #2e3a50;
+  text-align: center;
+  margin: 8px 0;
+  letter-spacing: 1px;
+}
+#dpad {
+  display: grid;
+  grid-template-columns: 52px 52px 52px;
+  grid-template-rows: 52px 52px 52px;
+  gap: 5px;
+  margin-top: 4px;
+}
+.dpad-btn {
+  width: 52px; height: 52px;
+  background: #1c2236;
+  border: 1px solid #2e3a5a;
+  color: #c4b89a;
+  font-size: 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.dpad-btn:active, .dpad-btn.active {
+  background: #c13628;
+}
+.dpad-empty {
+  width: 52px; height: 52px;
+}
+</style>
+</head>
+<body>
+<div id="title">不死之道 · IMMORTAL'S WAY</div>
+<div id="subtitle">guide the bunny past the stone lion guardians<br>reach the temple door at the top</div>
+<div id="game-container">
+  <canvas id="canvas"></canvas>
+  <div id="overlay">
+    <div id="overlay-title">✦ 通過 ✦</div>
+    <div id="overlay-sub">YOU REACHED THE TEMPLE</div>
+    <button id="retry-btn">TRY AGAIN</button>
+  </div>
+</div>
+<div id="legend">🐰 YOU · 🦁 GUARDIAN (½ SPEED) · ⛩ GOAL · <span style="color:rgba(193,54,40,0.5)">· · · ·</span> PUSH ZONE</div>
+<div id="dpad">
+  <div class="dpad-empty"></div>
+  <div class="dpad-btn" data-dx="0" data-dy="-1">↑</div>
+  <div class="dpad-empty"></div>
+  <div class="dpad-btn" data-dx="-1" data-dy="0">←</div>
+  <div class="dpad-empty"></div>
+  <div class="dpad-btn" data-dx="1" data-dy="0">→</div>
+  <div class="dpad-empty"></div>
+  <div class="dpad-btn" data-dx="0" data-dy="1">↓</div>
+  <div class="dpad-empty"></div>
+</div>
+
+<script>
+const GRID_W = 18;
+const GRID_H = 12;
+const DOOR_X = 7;
+const DOOR_W = 4;
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const container = document.getElementById('game-container');
+const overlay = document.getElementById('overlay');
+
+let CELL = 32;
+let bunny, lions, accumulator, status;
+
+function getCellSize() {
+  const cw = Math.floor((Math.min(window.innerWidth - 32, 700)) / GRID_W);
+  const ch = Math.floor((window.innerHeight * 0.48) / GRID_H);
+  return Math.min(cw, ch);
+}
+
+function resizeCanvas() {
+  CELL = getCellSize();
+  if (CELL < 10) CELL = 10;
+  canvas.width = GRID_W * CELL;
+  canvas.height = GRID_H * CELL;
+  container.style.width = canvas.width + 'px';
+  container.style.height = canvas.height + 'px';
+  draw();
+}
+
+function initState() {
+  bunny = { x: 8, y: 9 };
+  lions = [
+    { x: 1, y: 2, acc: 0 },
+    { x: 13, y: 2, acc: 0 }
+  ];
+  accumulator = 0;
+  status = 'playing';
+  overlay.style.display = 'none';
+}
+
+function clamp(v, lo, hi) {
+  return Math.max(lo, Math.min(hi, v));
+}
+
+function inPushZone(lion, bx, by) {
+  return bx >= lion.x - 1 && bx <= lion.x + 2 &&
+         by >= lion.y - 1 && by <= lion.y + 2;
+}
+
+function applyPush(lion, bx, by) {
+  const lcx = lion.x + 1;
+  const lcy = lion.y + 1;
+  const dx = (bx + 0.5) - lcx;
+  const dy = (by + 0.5) - lcy;
+  let nx = bx, ny = by;
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    nx = bx + (dx >= 0 ? 2 : -2);
+  } else {
+    ny = by + (dy >= 0 ? 2 : -2);
+  }
+  return { x: clamp(nx, 0, GRID_W - 1), y: clamp(ny, 0, GRID_H - 1) };
+}
+
+function stepLions(bunnyX) {
+  for (const lion of lions) {
+    lion.acc += 0.5;
+    if (lion.acc >= 1) {
+      lion.acc -= 1;
+      const targetX = clamp(bunnyX - 1, 0, GRID_W - 2);
+      if (lion.x < targetX) lion.x++;
+      else if (lion.x > targetX) lion.x--;
+    }
+  }
+}
+
+function move(dx, dy) {
+  if (status !== 'playing') return;
+
+  let nx = clamp(bunny.x + dx, 0, GRID_W - 1);
+  let ny = clamp(bunny.y + dy, 0, GRID_H - 1);
+  bunny.x = nx;
+  bunny.y = ny;
+
+  stepLions(bunny.x);
+
+  for (const lion of lions) {
+    if (inPushZone(lion, bunny.x, bunny.y)) {
+      const pushed = applyPush(lion, bunny.x, bunny.y);
+      bunny.x = pushed.x;
+      bunny.y = pushed.y;
+    }
+  }
+
+  if (bunny.y === 0 && bunny.x >= DOOR_X && bunny.x <= DOOR_X + DOOR_W - 1) {
+    status = 'won';
+    showOverlay();
+  }
+
+  draw();
+}
+
+function showOverlay() {
+  overlay.style.display = 'flex';
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function draw() {
+  const W = canvas.width;
+  const H = canvas.height;
+
+  // Background
+  ctx.fillStyle = '#101422';
+  ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = '#1e2540';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(0, 0, W, H);
+
+  // Dot grid
+  ctx.fillStyle = '#1e2540';
+  for (let r = 0; r < GRID_H; r++) {
+    for (let c = 0; c < GRID_W; c++) {
+      ctx.beginPath();
+      ctx.arc(c * CELL + CELL / 2, r * CELL + CELL / 2, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Temple door
+  const doorGrad = ctx.createLinearGradient(DOOR_X * CELL, 0, (DOOR_X + DOOR_W) * CELL, CELL);
+  doorGrad.addColorStop(0, '#2e6b5a');
+  doorGrad.addColorStop(1, '#4aad8a');
+  ctx.fillStyle = doorGrad;
+  ctx.fillRect(DOOR_X * CELL, 0, DOOR_W * CELL, CELL);
+  ctx.strokeStyle = '#4aad8a';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(DOOR_X * CELL, 0, DOOR_W * CELL, CELL);
+
+  // Door text
+  ctx.fillStyle = '#0b0f1c';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const doorFontSize = Math.max(10, CELL * 0.45);
+  ctx.font = doorFontSize + 'px "Courier New", monospace';
+  ctx.fillText('⛩ 门', (DOOR_X + DOOR_W / 2) * CELL, CELL / 2);
+
+  // Flanking walls
+  ctx.fillStyle = '#0d1020';
+  ctx.fillRect(0, 0, DOOR_X * CELL, CELL);
+  ctx.fillRect((DOOR_X + DOOR_W) * CELL, 0, (GRID_W - DOOR_X - DOOR_W) * CELL, CELL);
+
+  // Push zones (dashed)
+  for (const lion of lions) {
+    const zx = (lion.x - 1) * CELL;
+    const zy = (lion.y - 1) * CELL;
+    const zw = 4 * CELL;
+    const zh = 4 * CELL;
+    ctx.strokeStyle = 'rgba(193,54,40,0.25)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.strokeRect(zx, zy, zw, zh);
+    ctx.setLineDash([]);
+  }
+
+  // Lions
+  for (const lion of lions) {
+    const lx = lion.x * CELL;
+    const ly = lion.y * CELL;
+    const lw = 2 * CELL;
+    const lh = 2 * CELL;
+    const lionGrad = ctx.createLinearGradient(lx, ly, lx, ly + lh);
+    lionGrad.addColorStop(0, '#7a6548');
+    lionGrad.addColorStop(0.5, '#5c4a30');
+    lionGrad.addColorStop(1, '#3e3020');
+    roundRect(ctx, lx + 2, ly + 2, lw - 4, lh - 4, 6);
+    ctx.fillStyle = lionGrad;
+    ctx.fill();
+    ctx.strokeStyle = '#a08060';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Lion emoji
+    const lionEmoji = Math.max(12, CELL * 0.7);
+    ctx.font = lionEmoji + 'px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🦁', lx + lw / 2, ly + lh / 2 - CELL * 0.15);
+
+    // Label
+    const labelSize = Math.max(8, CELL * 0.3);
+    ctx.font = labelSize + 'px "Courier New", monospace';
+    ctx.fillStyle = '#a08060';
+    ctx.fillText('石獅', lx + lw / 2, ly + lh / 2 + CELL * 0.4);
+  }
+
+  // Bunny
+  const bx = bunny.x * CELL + CELL / 2;
+  const by = bunny.y * CELL + CELL / 2;
+  const br = CELL * 0.4;
+  const bunnyGrad = ctx.createRadialGradient(bx, by, 0, bx, by, br);
+  bunnyGrad.addColorStop(0, '#f5ede0');
+  bunnyGrad.addColorStop(1, '#d4b896');
+  ctx.beginPath();
+  ctx.arc(bx, by, br, 0, Math.PI * 2);
+  ctx.fillStyle = bunnyGrad;
+  ctx.fill();
+  ctx.strokeStyle = '#f0e4d0';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Bunny emoji
+  const bunnyEmoji = Math.max(10, CELL * 0.55);
+  ctx.font = bunnyEmoji + 'px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🐰', bx, by);
+}
+
+// Keyboard controls
+document.addEventListener('keydown', function(e) {
+  const keyMap = {
+    'ArrowLeft':  [-1,  0],
+    'ArrowRight': [ 1,  0],
+    'ArrowUp':    [ 0, -1],
+    'ArrowDown':  [ 0,  1]
+  };
+  if (keyMap[e.key]) {
+    e.preventDefault();
+    move(keyMap[e.key][0], keyMap[e.key][1]);
+  }
+});
+
+// D-pad controls
+document.querySelectorAll('.dpad-btn').forEach(function(btn) {
+  btn.addEventListener('pointerdown', function(e) {
+    e.preventDefault();
+    btn.classList.add('active');
+    const dx = parseInt(btn.dataset.dx);
+    const dy = parseInt(btn.dataset.dy);
+    move(dx, dy);
+  });
+  btn.addEventListener('pointerup', function() {
+    btn.classList.remove('active');
+  });
+  btn.addEventListener('pointerleave', function() {
+    btn.classList.remove('active');
+  });
+});
+
+// Retry button
+document.getElementById('retry-btn').addEventListener('click', function() {
+  initState();
+  draw();
+});
+
+// Resize handler
+window.addEventListener('resize', resizeCanvas);
+
+// Boot
+initState();
+resizeCanvas();
+draw();
+</script>
+</body>
+</html>
