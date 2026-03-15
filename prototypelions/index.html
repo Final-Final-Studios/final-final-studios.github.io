@@ -241,27 +241,31 @@ function lionsCrushBushes() {
   }
 }
 
-// Time-based lion tick — both lions independently track toward bunny
+// Time-based lion tick — lion A tracks bunny, lion B mirrors across axis
 function tickLions() {
   if (status !== 'playing') return;
 
-  for (let i = 0; i < lions.length; i++) {
-    const lion = lions[i];
-    // Target: center lion's 2x2 on bunny (left edge = bunny.x - 1)
-    const targetX = clamp(bunny.x - 1, 0, GRID_W - 2);
-    let stepDir = 0;
-    if (lion.x < targetX) stepDir = 1;
-    else if (lion.x > targetX) stepDir = -1;
+  // Lion A moves toward bunny
+  const targetA = clamp(bunny.x - 1, 0, GRID_W - 2);
+  let stepDir = 0;
+  if (lions[0].x < targetA) stepDir = 1;
+  else if (lions[0].x > targetA) stepDir = -1;
 
-    if (stepDir !== 0) {
-      const newX = clamp(lion.x + stepDir, 0, GRID_W - 2);
-      // Check won't overlap other lion
-      const other = lions[1 - i];
-      const wouldOverlap = newX < other.x + 2 && newX + 2 > other.x &&
-                           lion.y < other.y + 2 && lion.y + 2 > other.y;
-      if (!wouldOverlap) {
-        lion.x = newX;
-      }
+  if (stepDir !== 0) {
+    const newA = clamp(lions[0].x + stepDir, 0, GRID_W - 2);
+    // Lion B mirrors: reflect lion A's center across the axis
+    // Lion A center = newA + 1, mirrored center = 2*mirrorAxis - (newA+1)
+    // Lion B x = mirrored center - 1
+    const mirroredCenter = 2 * mirrorAxis - (newA + 1);
+    const newB = clamp(Math.round(mirroredCenter - 1), 0, GRID_W - 2);
+
+    // Check lions won't overlap each other
+    const wouldOverlap = newA < newB + 2 && newA + 2 > newB &&
+                         lions[0].y < lions[1].y + 2 && lions[0].y + 2 > lions[1].y;
+
+    if (!wouldOverlap) {
+      lions[0].x = newA;
+      lions[1].x = newB;
     }
   }
 
