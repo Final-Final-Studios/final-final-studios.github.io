@@ -237,17 +237,24 @@ function lionsCrushBushes() {
 function tickLions() {
   if (status !== 'playing') return;
 
+  // Helper: check if two 2x2 lions would overlap
+  function lionsOverlap(ax, ay, bx, by) {
+    return ax < bx + 2 && ax + 2 > bx && ay < by + 2 && ay + 2 > by;
+  }
+
   // Lion A moves one step toward bunny
   const targetA = clamp(bunny.x - 1, 0, GRID_W - 2);
-  if (lions[0].x < targetA) lions[0].x++;
-  else if (lions[0].x > targetA) lions[0].x--;
-  lions[0].x = clamp(lions[0].x, 0, GRID_W - 2);
+  let newA = lions[0].x;
+  if (lions[0].x < targetA) newA++;
+  else if (lions[0].x > targetA) newA--;
+  newA = clamp(newA, 0, GRID_W - 2);
 
-  // Lion B mirrors lion A across the axis
-  // Lion A center = lions[0].x + 1
-  // Offset from axis = (lions[0].x + 1) - MIRROR_AXIS
-  // Lion B center = MIRROR_AXIS - offset = 2*MIRROR_AXIS - lions[0].x - 1
-  // Lion B x = center - 1 = 2*MIRROR_AXIS - lions[0].x - 2
+  // Only move A if it won't overlap B
+  if (!lionsOverlap(newA, lions[0].y, lions[1].x, lions[1].y)) {
+    lions[0].x = newA;
+  }
+
+  // Lion B mirrors lion A across the fixed axis
   const targetB = clamp(2 * MIRROR_AXIS - lions[0].x - 2, 0, GRID_W - 2);
 
   // Move lion B one step toward its mirror target
@@ -256,10 +263,8 @@ function tickLions() {
   else if (lions[1].x > targetB) newB--;
   newB = clamp(newB, 0, GRID_W - 2);
 
-  // Only apply if they won't overlap
-  const wouldOverlap = lions[0].x < newB + 2 && lions[0].x + 2 > newB &&
-                       lions[0].y < lions[1].y + 2 && lions[0].y + 2 > lions[1].y;
-  if (!wouldOverlap) {
+  // Only move B if it won't overlap A
+  if (!lionsOverlap(lions[0].x, lions[0].y, newB, lions[1].y)) {
     lions[1].x = newB;
   }
 
