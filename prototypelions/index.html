@@ -111,8 +111,6 @@ canvas { display: block; }
 </style>
 </head>
 <body>
-<div id="title">不死之道 · IMMORTAL'S WAY</div>
-<div id="subtitle">guide the bunny past the stone lion guardians<br>reach the temple door at the top</div>
 <div id="game-container">
   <canvas id="canvas"></canvas>
   <div id="overlay">
@@ -165,7 +163,7 @@ function resizeCanvas() {
 }
 
 function initState() {
-  bunny = { x: 8, y: 9 };
+  bunny = { x: 8, y: 11 };
   lions = [
     { x: 1, y: 2, acc: 0 },
     { x: 13, y: 2, acc: 0 }
@@ -198,14 +196,43 @@ function applyPush(lion, bx, by) {
   return { x: clamp(nx, 0, GRID_W - 1), y: clamp(ny, 0, GRID_H - 1) };
 }
 
-function stepLions(bunnyX) {
-  for (const lion of lions) {
-    lion.acc += 0.5;
-    if (lion.acc >= 1) {
+function lionsOverlap(x1, lion1, x2, lion2) {
+  // Two 2x2 lions overlap if their bounding boxes intersect
+  // lion is at (x, y) occupying x..x+1, y..y+1
+  if (lion1 === lion2) return false;
+  return x1 < x2 + 2 && x1 + 2 > x2 &&
+         lion1.y < lion2.y + 2 && lion1.y + 2 > lion2.y;
+}
+
+function tryMoveLion(i, newX) {
+  const lion = lions[i];
+  newX = clamp(newX, 0, GRID_W - 2);
+  for (let j = 0; j < lions.length; j++) {
+    if (i === j) continue;
+    if (newX < lions[j].x + 2 && newX + 2 > lions[j].x &&
+        lion.y < lions[j].y + 2 && lion.y + 2 > lions[j].y) {
+      return false;
+    }
+  }
+  lion.x = newX;
+  return true;
+}
+
+function stepLions(bunnyX, bunnyY) {
+  for (let i = 0; i < lions.length; i++) {
+    const lion = lions[i];
+    const targetX = clamp(bunnyX - 1, 0, GRID_W - 2);
+    // Lions move at half speed normally, but full speed when bunny
+    // is at or above their row (approaching the door)
+    const urgent = bunnyY <= lion.y + 3;
+    lion.acc += urgent ? 1 : 0.5;
+    while (lion.acc >= 1) {
       lion.acc -= 1;
-      const targetX = clamp(bunnyX - 1, 0, GRID_W - 2);
-      if (lion.x < targetX) lion.x++;
-      else if (lion.x > targetX) lion.x--;
+      let newX = lion.x;
+      if (lion.x < targetX) newX = lion.x + 1;
+      else if (lion.x > targetX) newX = lion.x - 1;
+      if (newX === lion.x) break;
+      if (!tryMoveLion(i, newX)) break;
     }
   }
 }
@@ -218,7 +245,7 @@ function move(dx, dy) {
   bunny.x = nx;
   bunny.y = ny;
 
-  stepLions(bunny.x);
+  stepLions(bunny.x, bunny.y);
 
   for (const lion of lions) {
     if (inPushZone(lion, bunny.x, bunny.y)) {
