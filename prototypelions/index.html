@@ -144,7 +144,7 @@ const container = document.getElementById('game-container');
 const overlay = document.getElementById('overlay');
 
 let CELL = 32;
-let bunny, lions, accumulator, status;
+let bunny, lions, mirrorAxis, accumulator, status;
 
 function getCellSize() {
   const cw = Math.floor((Math.min(window.innerWidth - 32, 700)) / GRID_W);
@@ -168,6 +168,7 @@ function initState() {
     { x: 1, y: 2, acc: 0 },
     { x: 13, y: 2, acc: 0 }
   ];
+  mirrorAxis = 8; // midpoint between lions, updates when bunny crosses it
   accumulator = 0;
   status = 'playing';
   overlay.style.display = 'none';
@@ -219,31 +220,44 @@ function tryMoveLion(i, newX) {
 }
 
 function stepLions(bunnyX, bunnyY) {
-  for (let i = 0; i < lions.length; i++) {
-    const lion = lions[i];
-    const targetX = clamp(bunnyX - 1, 0, GRID_W - 2);
-    // Lions move at half speed normally, but full speed when bunny
-    // is at or above their row (approaching the door)
-    const urgent = bunnyY <= lion.y + 3;
-    lion.acc += urgent ? 1 : 0.5;
-    while (lion.acc >= 1) {
-      lion.acc -= 1;
+  // Lion A (index 0) tracks bunny directly, Lion B (index 1) mirrors across axis
+  const offset = bunnyX - mirrorAxis;
+  const targetA = clamp(bunnyX - 1, 0, GRID_W - 2);
+  const targetB = clamp((mirrorAxis - offset) - 1, 0, GRID_W - 2); // mirrored
+
+  const targets = [targetA, targetB];
+
+  // Half speed: accumulator shared, add 0.5 per move
+  lions[0].acc += 0.5;
+  if (lions[0].acc >= 1) {
+    lions[0].acc -= 1;
+    for (let i = 0; i < lions.length; i++) {
+      const lion = lions[i];
+      const target = targets[i];
       let newX = lion.x;
-      if (lion.x < targetX) newX = lion.x + 1;
-      else if (lion.x > targetX) newX = lion.x - 1;
-      if (newX === lion.x) break;
-      if (!tryMoveLion(i, newX)) break;
+      if (lion.x < target) newX = lion.x + 1;
+      else if (lion.x > target) newX = lion.x - 1;
+      if (newX !== lion.x) tryMoveLion(i, newX);
     }
   }
+  // Keep accumulators in sync
+  lions[1].acc = lions[0].acc;
 }
 
 function move(dx, dy) {
   if (status !== 'playing') return;
 
+  const prevBunnyX = bunny.x;
   let nx = clamp(bunny.x + dx, 0, GRID_W - 1);
   let ny = clamp(bunny.y + dy, 0, GRID_H - 1);
   bunny.x = nx;
   bunny.y = ny;
+
+  // Update mirror axis if bunny crossed it
+  if ((prevBunnyX < mirrorAxis && bunny.x >= mirrorAxis) ||
+      (prevBunnyX > mirrorAxis && bunny.x <= mirrorAxis)) {
+    mirrorAxis = bunny.x;
+  }
 
   stepLions(bunny.x, bunny.y);
 
@@ -324,6 +338,17 @@ function draw() {
   ctx.fillStyle = '#0d1020';
   ctx.fillRect(0, 0, DOOR_X * CELL, CELL);
   ctx.fillRect((DOOR_X + DOOR_W) * CELL, 0, (GRID_W - DOOR_X - DOOR_W) * CELL, CELL);
+
+  // Mirror axis (vertical line)
+  ctx.strokeStyle = 'rgba(78,120,180,0.25)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  const axisPixelX = mirrorAxis * CELL + CELL / 2;
+  ctx.beginPath();
+  ctx.moveTo(axisPixelX, 0);
+  ctx.lineTo(axisPixelX, H);
+  ctx.stroke();
+  ctx.setLineDash([]);
 
   // Push zones (dashed)
   for (const lion of lions) {
