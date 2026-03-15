@@ -144,7 +144,7 @@ const container = document.getElementById('game-container');
 const overlay = document.getElementById('overlay');
 
 let CELL = 32;
-let bunny, lions, mirrorAxis, bunnyOnAxis, status, lionTimer, bushes;
+let bunny, lions, mirrorAxis, lastHDir, status, lionTimer, bushes;
 const LION_STEP_MS = 600; // lions take a step every 600ms
 
 // Bush positions — line the left and right top sides
@@ -177,12 +177,13 @@ function resizeCanvas() {
 
 function initState() {
   bunny = { x: 8, y: 11 };
+  // Lions symmetric around axis=8: A center=3 (offset -5), B center=13 (offset +5)
   lions = [
-    { x: 1, y: 2 },
-    { x: 13, y: 2 }
+    { x: 2, y: 2 },
+    { x: 12, y: 2 }
   ];
   mirrorAxis = 8;
-  bunnyOnAxis = false; // true when bunny is standing on the axis
+  lastHDir = 0; // last horizontal direction bunny moved: -1, 0, or 1
   status = 'playing';
   overlay.style.display = 'none';
   // Reset bushes
@@ -251,14 +252,18 @@ function tickLions() {
   else if (lions[0].x > targetA) lions[0].x--;
   lions[0].x = clamp(lions[0].x, 0, GRID_W - 2);
 
-  // Lion B always mirrors lion A across the axis
-  // If lion A center is D units right of axis, lion B center is D units left
-  // Lion center = lion.x + 1, so:
-  //   lionA_offset = lions[0].x + 1 - mirrorAxis
-  //   lionB_center = mirrorAxis - lionA_offset
-  //   lionB.x = lionB_center - 1
-  const offsetA = (lions[0].x + 1) - mirrorAxis;
-  const newB = clamp(Math.round(mirrorAxis - offsetA - 1), 0, GRID_W - 2);
+  // Lion B mirrors lion A across the axis
+  // Lion A center = lions[0].x + 1
+  // Offset from axis = (lions[0].x + 1) - mirrorAxis
+  // Lion B center = mirrorAxis - offset = 2*mirrorAxis - lions[0].x - 1
+  // Lion B x = center - 1 = 2*mirrorAxis - lions[0].x - 2
+  const targetB = clamp(2 * mirrorAxis - lions[0].x - 2, 0, GRID_W - 2);
+
+  // Move lion B one step toward its mirror target
+  let newB = lions[1].x;
+  if (lions[1].x < targetB) newB++;
+  else if (lions[1].x > targetB) newB--;
+  newB = clamp(newB, 0, GRID_W - 2);
 
   // Only apply if they won't overlap
   const wouldOverlap = lions[0].x < newB + 2 && lions[0].x + 2 > newB &&
@@ -317,14 +322,15 @@ function move(dx, dy) {
   bunny.x = nx;
   bunny.y = ny;
 
-  // Mirror axis: when bunny steps onto the axis column, mark it.
-  // When bunny moves off in a direction, that position becomes the new axis.
-  if (bunny.x === mirrorAxis) {
-    bunnyOnAxis = true;
-  } else if (bunnyOnAxis) {
-    // Bunny was on axis, now moved off — set new axis where bunny landed
-    mirrorAxis = bunny.x;
-    bunnyOnAxis = false;
+  // Mirror axis: follows bunny as you move in one direction.
+  // When you reverse horizontal direction, axis locks in place.
+  if (dx !== 0) {
+    if (lastHDir === 0 || dx === lastHDir) {
+      // Same direction (or first move) — axis follows bunny
+      mirrorAxis = bunny.x;
+    }
+    // Opposite direction — axis stays where it is (locked)
+    lastHDir = dx;
   }
 
   // Push bunny if in push zone after moving
