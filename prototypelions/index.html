@@ -144,7 +144,8 @@ const container = document.getElementById('game-container');
 const overlay = document.getElementById('overlay');
 
 let CELL = 32;
-let bunny, lions, mirrorAxis, accumulator, status;
+let bunny, lions, mirrorAxis, status, lionTimer;
+const LION_STEP_MS = 600; // lions take a step every 600ms
 
 function getCellSize() {
   const cw = Math.floor((Math.min(window.innerWidth - 32, 700)) / GRID_W);
@@ -165,89 +166,100 @@ function resizeCanvas() {
 function initState() {
   bunny = { x: 8, y: 11 };
   lions = [
-    { x: 1, y: 2, acc: 0 },
-    { x: 13, y: 2, acc: 0 }
+    { x: 1, y: 2 },
+    { x: 13, y: 2 }
   ];
-  mirrorAxis = 8; // midpoint between lions, updates when bunny crosses it
-  accumulator = 0;
+  mirrorAxis = 8;
   status = 'playing';
   overlay.style.display = 'none';
+  // Start time-based lion movement
+  if (lionTimer) clearInterval(lionTimer);
+  lionTimer = setInterval(tickLions, LION_STEP_MS);
 }
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
 }
 
+// Check if bunny overlaps a 2x2 lion body
+function bunnyOnLion(bx, by) {
+  for (const lion of lions) {
+    if (bx >= lion.x && bx <= lion.x + 1 &&
+        by >= lion.y && by <= lion.y + 1) {
+      return lion;
+    }
+  }
+  return null;
+}
+
+// Push bunny away from lion center
+function pushBunnyFrom(lion) {
+  const lcx = lion.x + 1;
+  const lcy = lion.y + 1;
+  const dx = (bunny.x + 0.5) - lcx;
+  const dy = (bunny.y + 0.5) - lcy;
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    bunny.x = clamp(bunny.x + (dx >= 0 ? 2 : -2), 0, GRID_W - 1);
+  } else {
+    bunny.y = clamp(bunny.y + (dy >= 0 ? 2 : -2), 0, GRID_H - 1);
+  }
+}
+
+// Check if bunny is in push zone (1-cell margin around lion body)
 function inPushZone(lion, bx, by) {
   return bx >= lion.x - 1 && bx <= lion.x + 2 &&
          by >= lion.y - 1 && by <= lion.y + 2;
 }
 
-function applyPush(lion, bx, by) {
-  const lcx = lion.x + 1;
-  const lcy = lion.y + 1;
-  const dx = (bx + 0.5) - lcx;
-  const dy = (by + 0.5) - lcy;
-  let nx = bx, ny = by;
-  if (Math.abs(dx) >= Math.abs(dy)) {
-    nx = bx + (dx >= 0 ? 2 : -2);
-  } else {
-    ny = by + (dy >= 0 ? 2 : -2);
-  }
-  return { x: clamp(nx, 0, GRID_W - 1), y: clamp(ny, 0, GRID_H - 1) };
-}
+// Time-based lion tick — lions step toward bunny, mirrored across axis
+function tickLions() {
+  if (status !== 'playing') return;
 
-function lionsOverlap(x1, lion1, x2, lion2) {
-  // Two 2x2 lions overlap if their bounding boxes intersect
-  // lion is at (x, y) occupying x..x+1, y..y+1
-  if (lion1 === lion2) return false;
-  return x1 < x2 + 2 && x1 + 2 > x2 &&
-         lion1.y < lion2.y + 2 && lion1.y + 2 > lion2.y;
-}
+  // Lion A: find direction toward bunny
+  const targetA = clamp(bunny.x - 1, 0, GRID_W - 2);
+  let stepDir = 0;
+  if (lions[0].x < targetA) stepDir = 1;
+  else if (lions[0].x > targetA) stepDir = -1;
 
-function tryMoveLion(i, newX) {
-  const lion = lions[i];
-  newX = clamp(newX, 0, GRID_W - 2);
-  for (let j = 0; j < lions.length; j++) {
-    if (i === j) continue;
-    if (newX < lions[j].x + 2 && newX + 2 > lions[j].x &&
-        lion.y < lions[j].y + 2 && lion.y + 2 > lions[j].y) {
-      return false;
+  if (stepDir !== 0) {
+    // Lion A moves toward bunny, Lion B mirrors (opposite direction)
+    const newA = clamp(lions[0].x + stepDir, 0, GRID_W - 2);
+    const newB = clamp(lions[1].x - stepDir, 0, GRID_W - 2);
+
+    // Check lions won't overlap each other
+    const wouldOverlap = newA < newB + 2 && newA + 2 > newB &&
+                         lions[0].y < lions[1].y + 2 && lions[0].y + 2 > lions[1].y;
+
+    if (!wouldOverlap) {
+      lions[0].x = newA;
+      lions[1].x = newB;
     }
   }
-  lion.x = newX;
-  return true;
-}
 
-function stepLions(bunnyX, bunnyY) {
-  // Mirrored movement: lion A moves toward bunny, lion B mirrors (opposite direction)
-  // They share a single accumulator at half speed
-  lions[0].acc += 0.5;
-  if (lions[0].acc >= 1) {
-    lions[0].acc -= 1;
-
-    // Determine which direction lion A should move to approach bunny
-    const targetA = clamp(bunnyX - 1, 0, GRID_W - 2);
-    let stepDir = 0;
-    if (lions[0].x < targetA) stepDir = 1;
-    else if (lions[0].x > targetA) stepDir = -1;
-
-    if (stepDir !== 0) {
-      // Lion A moves toward bunny, Lion B mirrors (opposite direction)
-      const newA = clamp(lions[0].x + stepDir, 0, GRID_W - 2);
-      const newB = clamp(lions[1].x - stepDir, 0, GRID_W - 2);
-
-      // Check they won't overlap each other at new positions
-      const wouldOverlap = newA < newB + 2 && newA + 2 > newB &&
-                           lions[0].y < lions[1].y + 2 && lions[0].y + 2 > lions[1].y;
-
-      if (!wouldOverlap) {
-        lions[0].x = newA;
-        lions[1].x = newB;
-      }
+  // After lions move, push bunny if it's on a lion
+  for (const lion of lions) {
+    if (bunnyOnLion(bunny.x, bunny.y)) {
+      pushBunnyFrom(lion);
     }
   }
-  lions[1].acc = lions[0].acc;
+
+  // Check push zones
+  for (const lion of lions) {
+    if (inPushZone(lion, bunny.x, bunny.y)) {
+      pushBunnyFrom(lion);
+    }
+  }
+
+  checkWin();
+  draw();
+}
+
+function checkWin() {
+  if (bunny.y === 0 && bunny.x >= DOOR_X && bunny.x <= DOOR_X + DOOR_W - 1) {
+    status = 'won';
+    if (lionTimer) clearInterval(lionTimer);
+    showOverlay();
+  }
 }
 
 function move(dx, dy) {
@@ -256,35 +268,43 @@ function move(dx, dy) {
   const prevBunnyX = bunny.x;
   let nx = clamp(bunny.x + dx, 0, GRID_W - 1);
   let ny = clamp(bunny.y + dy, 0, GRID_H - 1);
+
+  // Don't allow moving onto a lion body
+  const blockingLion = bunnyOnLion(nx, ny);
+  if (blockingLion) {
+    // Slide along the other axis if possible, otherwise stay
+    if (dx !== 0) {
+      // Tried horizontal, blocked — stay
+      nx = bunny.x;
+    } else {
+      // Tried vertical, blocked — stay
+      ny = bunny.y;
+    }
+  }
+
   bunny.x = nx;
   bunny.y = ny;
 
   // Update mirror axis if bunny crossed it
-  if ((prevBunnyX < mirrorAxis && bunny.x >= mirrorAxis) ||
-      (prevBunnyX > mirrorAxis && bunny.x <= mirrorAxis)) {
+  if ((prevBunnyX < mirrorAxis && bunny.x > mirrorAxis) ||
+      (prevBunnyX > mirrorAxis && bunny.x < mirrorAxis)) {
     mirrorAxis = bunny.x;
   }
 
-  stepLions(bunny.x, bunny.y);
-
+  // Push bunny if in push zone after moving
   for (const lion of lions) {
     if (inPushZone(lion, bunny.x, bunny.y)) {
-      const pushed = applyPush(lion, bunny.x, bunny.y);
-      bunny.x = pushed.x;
-      bunny.y = pushed.y;
+      pushBunnyFrom(lion);
     }
   }
 
-  if (bunny.y === 0 && bunny.x >= DOOR_X && bunny.x <= DOOR_X + DOOR_W - 1) {
-    status = 'won';
-    showOverlay();
-  }
-
+  checkWin();
   draw();
 }
 
 function showOverlay() {
   overlay.style.display = 'flex';
+  if (lionTimer) clearInterval(lionTimer);
 }
 
 function roundRect(ctx, x, y, w, h, r) {
