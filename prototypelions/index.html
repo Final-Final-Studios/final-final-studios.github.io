@@ -245,28 +245,26 @@ function lionsCrushBushes() {
 function tickLions() {
   if (status !== 'playing') return;
 
-  // Lion A moves toward bunny
+  // Lion A moves one step toward bunny
   const targetA = clamp(bunny.x - 1, 0, GRID_W - 2);
-  let stepDir = 0;
-  if (lions[0].x < targetA) stepDir = 1;
-  else if (lions[0].x > targetA) stepDir = -1;
+  if (lions[0].x < targetA) lions[0].x++;
+  else if (lions[0].x > targetA) lions[0].x--;
+  lions[0].x = clamp(lions[0].x, 0, GRID_W - 2);
 
-  if (stepDir !== 0) {
-    const newA = clamp(lions[0].x + stepDir, 0, GRID_W - 2);
-    // Lion B mirrors: reflect lion A's center across the axis
-    // Lion A center = newA + 1, mirrored center = 2*mirrorAxis - (newA+1)
-    // Lion B x = mirrored center - 1
-    const mirroredCenter = 2 * mirrorAxis - (newA + 1);
-    const newB = clamp(Math.round(mirroredCenter - 1), 0, GRID_W - 2);
+  // Lion B always mirrors lion A across the axis
+  // If lion A center is D units right of axis, lion B center is D units left
+  // Lion center = lion.x + 1, so:
+  //   lionA_offset = lions[0].x + 1 - mirrorAxis
+  //   lionB_center = mirrorAxis - lionA_offset
+  //   lionB.x = lionB_center - 1
+  const offsetA = (lions[0].x + 1) - mirrorAxis;
+  const newB = clamp(Math.round(mirrorAxis - offsetA - 1), 0, GRID_W - 2);
 
-    // Check lions won't overlap each other
-    const wouldOverlap = newA < newB + 2 && newA + 2 > newB &&
-                         lions[0].y < lions[1].y + 2 && lions[0].y + 2 > lions[1].y;
-
-    if (!wouldOverlap) {
-      lions[0].x = newA;
-      lions[1].x = newB;
-    }
+  // Only apply if they won't overlap
+  const wouldOverlap = lions[0].x < newB + 2 && lions[0].x + 2 > newB &&
+                       lions[0].y < lions[1].y + 2 && lions[0].y + 2 > lions[1].y;
+  if (!wouldOverlap) {
+    lions[1].x = newB;
   }
 
   // Lions crush bushes they walk over
