@@ -119,7 +119,7 @@ canvas { display: block; }
     <button id="retry-btn">TRY AGAIN</button>
   </div>
 </div>
-<div id="legend">🐰 YOU · 🦁 GUARDIAN (½ SPEED) · ⛩ GOAL · <span style="color:rgba(193,54,40,0.5)">· · · ·</span> PUSH ZONE</div>
+<div id="legend">🐰 YOU · 🦁 GUARDIAN · ⛩ GOAL · 🌿 BUSH · <span style="color:rgba(193,54,40,0.5)">· · · ·</span> PUSH</div>
 <div id="dpad">
   <div class="dpad-empty"></div>
   <div class="dpad-btn" data-dx="0" data-dy="-1">↑</div>
@@ -144,8 +144,27 @@ const container = document.getElementById('game-container');
 const overlay = document.getElementById('overlay');
 
 let CELL = 32;
-let bunny, lions, mirrorAxis, status, lionTimer;
+let bunny, lions, mirrorAxis, status, lionTimer, bushes;
 const LION_STEP_MS = 600; // lions take a step every 600ms
+
+// Bush positions scattered around edges
+const BUSH_LAYOUT = [
+  // Left edge clusters
+  {x:0,y:3},{x:0,y:4},{x:1,y:4},
+  {x:0,y:7},{x:0,y:8},{x:1,y:7},
+  // Right edge clusters
+  {x:17,y:3},{x:17,y:4},{x:16,y:4},
+  {x:17,y:7},{x:17,y:8},{x:16,y:7},
+  // Bottom edge
+  {x:3,y:11},{x:4,y:11},{x:5,y:11},
+  {x:12,y:11},{x:13,y:11},{x:14,y:11},
+  // Mid-edge patches
+  {x:0,y:10},{x:1,y:10},
+  {x:16,y:10},{x:17,y:10},
+  // Upper corners
+  {x:1,y:1},{x:2,y:1},
+  {x:15,y:1},{x:16,y:1},
+];
 
 function getCellSize() {
   const cw = Math.floor((Math.min(window.innerWidth - 32, 700)) / GRID_W);
@@ -172,6 +191,8 @@ function initState() {
   mirrorAxis = 8;
   status = 'playing';
   overlay.style.display = 'none';
+  // Reset bushes
+  bushes = new Set(BUSH_LAYOUT.map(b => b.x + ',' + b.y));
   // Start time-based lion movement
   if (lionTimer) clearInterval(lionTimer);
   lionTimer = setInterval(tickLions, LION_STEP_MS);
@@ -179,6 +200,10 @@ function initState() {
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
+}
+
+function hasBush(x, y) {
+  return bushes.has(x + ',' + y);
 }
 
 // Check if bunny overlaps a 2x2 lion body
@@ -192,16 +217,16 @@ function bunnyOnLion(bx, by) {
   return null;
 }
 
-// Push bunny away from lion center
+// Push bunny away from lion center — push 3 cells away
 function pushBunnyFrom(lion) {
   const lcx = lion.x + 1;
   const lcy = lion.y + 1;
   const dx = (bunny.x + 0.5) - lcx;
   const dy = (bunny.y + 0.5) - lcy;
   if (Math.abs(dx) >= Math.abs(dy)) {
-    bunny.x = clamp(bunny.x + (dx >= 0 ? 2 : -2), 0, GRID_W - 1);
+    bunny.x = clamp(bunny.x + (dx >= 0 ? 3 : -3), 0, GRID_W - 1);
   } else {
-    bunny.y = clamp(bunny.y + (dy >= 0 ? 2 : -2), 0, GRID_H - 1);
+    bunny.y = clamp(bunny.y + (dy >= 0 ? 3 : -3), 0, GRID_H - 1);
   }
 }
 
@@ -211,42 +236,54 @@ function inPushZone(lion, bx, by) {
          by >= lion.y - 1 && by <= lion.y + 2;
 }
 
-// Time-based lion tick — lions step toward bunny, mirrored across axis
+// Lions destroy any bushes they overlap
+function lionsCrushBushes() {
+  for (const lion of lions) {
+    for (let dx = 0; dx <= 1; dx++) {
+      for (let dy = 0; dy <= 1; dy++) {
+        bushes.delete((lion.x + dx) + ',' + (lion.y + dy));
+      }
+    }
+  }
+}
+
+// Time-based lion tick — both lions independently track toward bunny
 function tickLions() {
   if (status !== 'playing') return;
 
-  // Lion A: find direction toward bunny
-  const targetA = clamp(bunny.x - 1, 0, GRID_W - 2);
-  let stepDir = 0;
-  if (lions[0].x < targetA) stepDir = 1;
-  else if (lions[0].x > targetA) stepDir = -1;
+  for (let i = 0; i < lions.length; i++) {
+    const lion = lions[i];
+    // Target: center lion's 2x2 on bunny (left edge = bunny.x - 1)
+    const targetX = clamp(bunny.x - 1, 0, GRID_W - 2);
+    let stepDir = 0;
+    if (lion.x < targetX) stepDir = 1;
+    else if (lion.x > targetX) stepDir = -1;
 
-  if (stepDir !== 0) {
-    // Lion A moves toward bunny, Lion B mirrors (opposite direction)
-    const newA = clamp(lions[0].x + stepDir, 0, GRID_W - 2);
-    const newB = clamp(lions[1].x - stepDir, 0, GRID_W - 2);
-
-    // Check lions won't overlap each other
-    const wouldOverlap = newA < newB + 2 && newA + 2 > newB &&
-                         lions[0].y < lions[1].y + 2 && lions[0].y + 2 > lions[1].y;
-
-    if (!wouldOverlap) {
-      lions[0].x = newA;
-      lions[1].x = newB;
+    if (stepDir !== 0) {
+      const newX = clamp(lion.x + stepDir, 0, GRID_W - 2);
+      // Check won't overlap other lion
+      const other = lions[1 - i];
+      const wouldOverlap = newX < other.x + 2 && newX + 2 > other.x &&
+                           lion.y < other.y + 2 && lion.y + 2 > other.y;
+      if (!wouldOverlap) {
+        lion.x = newX;
+      }
     }
   }
 
-  // After lions move, push bunny if it's on a lion
-  for (const lion of lions) {
-    if (bunnyOnLion(bunny.x, bunny.y)) {
-      pushBunnyFrom(lion);
-    }
-  }
+  // Lions crush bushes they walk over
+  lionsCrushBushes();
 
-  // Check push zones
-  for (const lion of lions) {
-    if (inPushZone(lion, bunny.x, bunny.y)) {
-      pushBunnyFrom(lion);
+  // After lions move, push bunny if overlapping lion body
+  let pushed = true;
+  let safety = 5;
+  while (pushed && safety-- > 0) {
+    pushed = false;
+    for (const lion of lions) {
+      if (bunnyOnLion(bunny.x, bunny.y)) {
+        pushBunnyFrom(lion);
+        pushed = true;
+      }
     }
   }
 
@@ -270,16 +307,15 @@ function move(dx, dy) {
   let ny = clamp(bunny.y + dy, 0, GRID_H - 1);
 
   // Don't allow moving onto a lion body
-  const blockingLion = bunnyOnLion(nx, ny);
-  if (blockingLion) {
-    // Slide along the other axis if possible, otherwise stay
-    if (dx !== 0) {
-      // Tried horizontal, blocked — stay
-      nx = bunny.x;
-    } else {
-      // Tried vertical, blocked — stay
-      ny = bunny.y;
-    }
+  if (bunnyOnLion(nx, ny)) {
+    nx = bunny.x;
+    ny = bunny.y;
+  }
+
+  // Don't allow moving onto a bush
+  if (hasBush(nx, ny)) {
+    nx = bunny.x;
+    ny = bunny.y;
   }
 
   bunny.x = nx;
@@ -364,6 +400,23 @@ function draw() {
   ctx.fillStyle = '#0d1020';
   ctx.fillRect(0, 0, DOOR_X * CELL, CELL);
   ctx.fillRect((DOOR_X + DOOR_W) * CELL, 0, (GRID_W - DOOR_X - DOOR_W) * CELL, CELL);
+
+  // Bushes
+  for (const key of bushes) {
+    const [bx, by] = key.split(',').map(Number);
+    const px = bx * CELL;
+    const py = by * CELL;
+    ctx.fillStyle = '#1a3a28';
+    ctx.fillRect(px + 1, py + 1, CELL - 2, CELL - 2);
+    ctx.strokeStyle = '#2e6b4a';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px + 1, py + 1, CELL - 2, CELL - 2);
+    const bushSize = Math.max(10, CELL * 0.55);
+    ctx.font = bushSize + 'px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🌿', px + CELL / 2, py + CELL / 2);
+  }
 
   // Mirror axis (vertical line)
   ctx.strokeStyle = 'rgba(120,160,220,0.5)';
