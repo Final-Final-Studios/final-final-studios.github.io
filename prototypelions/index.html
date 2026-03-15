@@ -144,8 +144,9 @@ const container = document.getElementById('game-container');
 const overlay = document.getElementById('overlay');
 
 let CELL = 32;
-let bunny, lions, mirrorAxis, lastHDir, status, lionTimer, bushes;
-const LION_STEP_MS = 600; // lions take a step every 600ms
+let bunny, lions, status, lionTimer, bushes;
+const MIRROR_AXIS = 8; // fixed center axis, never moves
+const LION_STEP_MS = 400; // lions take a step every 400ms
 
 // Bush positions — line the left and right top sides
 const BUSH_LAYOUT = [
@@ -177,13 +178,11 @@ function resizeCanvas() {
 
 function initState() {
   bunny = { x: 8, y: 11 };
-  // Lions symmetric around axis=8: A center=3 (offset -5), B center=13 (offset +5)
+  // Lions symmetric around MIRROR_AXIS=8: A center=3, B center=13
   lions = [
     { x: 2, y: 2 },
     { x: 12, y: 2 }
   ];
-  mirrorAxis = 8;
-  lastHDir = 0; // last horizontal direction bunny moved: -1, 0, or 1
   status = 'playing';
   overlay.style.display = 'none';
   // Reset bushes
@@ -212,17 +211,9 @@ function bunnyOnLion(bx, by) {
   return null;
 }
 
-// Push bunny away from lion center — push 3 cells away
+// Push bunny downward (toward bottom / in front of lion) — 3 cells
 function pushBunnyFrom(lion) {
-  const lcx = lion.x + 1;
-  const lcy = lion.y + 1;
-  const dx = (bunny.x + 0.5) - lcx;
-  const dy = (bunny.y + 0.5) - lcy;
-  if (Math.abs(dx) >= Math.abs(dy)) {
-    bunny.x = clamp(bunny.x + (dx >= 0 ? 3 : -3), 0, GRID_W - 1);
-  } else {
-    bunny.y = clamp(bunny.y + (dy >= 0 ? 3 : -3), 0, GRID_H - 1);
-  }
+  bunny.y = clamp(bunny.y + 3, 0, GRID_H - 1);
 }
 
 // Check if bunny is in push zone (1-cell margin around lion body)
@@ -254,10 +245,10 @@ function tickLions() {
 
   // Lion B mirrors lion A across the axis
   // Lion A center = lions[0].x + 1
-  // Offset from axis = (lions[0].x + 1) - mirrorAxis
-  // Lion B center = mirrorAxis - offset = 2*mirrorAxis - lions[0].x - 1
-  // Lion B x = center - 1 = 2*mirrorAxis - lions[0].x - 2
-  const targetB = clamp(2 * mirrorAxis - lions[0].x - 2, 0, GRID_W - 2);
+  // Offset from axis = (lions[0].x + 1) - MIRROR_AXIS
+  // Lion B center = MIRROR_AXIS - offset = 2*MIRROR_AXIS - lions[0].x - 1
+  // Lion B x = center - 1 = 2*MIRROR_AXIS - lions[0].x - 2
+  const targetB = clamp(2 * MIRROR_AXIS - lions[0].x - 2, 0, GRID_W - 2);
 
   // Move lion B one step toward its mirror target
   let newB = lions[1].x;
@@ -303,7 +294,6 @@ function checkWin() {
 function move(dx, dy) {
   if (status !== 'playing') return;
 
-  const prevBunnyX = bunny.x;
   let nx = clamp(bunny.x + dx, 0, GRID_W - 1);
   let ny = clamp(bunny.y + dy, 0, GRID_H - 1);
 
@@ -321,17 +311,6 @@ function move(dx, dy) {
 
   bunny.x = nx;
   bunny.y = ny;
-
-  // Mirror axis: follows bunny as you move in one direction.
-  // When you reverse horizontal direction, axis locks in place.
-  if (dx !== 0) {
-    if (lastHDir === 0 || dx === lastHDir) {
-      // Same direction (or first move) — axis follows bunny
-      mirrorAxis = bunny.x;
-    }
-    // Opposite direction — axis stays where it is (locked)
-    lastHDir = dx;
-  }
 
   // Push bunny if in push zone after moving
   for (const lion of lions) {
@@ -428,7 +407,7 @@ function draw() {
   ctx.strokeStyle = 'rgba(120,160,220,0.5)';
   ctx.lineWidth = 2;
   ctx.setLineDash([6, 4]);
-  const axisPixelX = mirrorAxis * CELL + CELL / 2;
+  const axisPixelX = MIRROR_AXIS * CELL + CELL / 2;
   ctx.beginPath();
   ctx.moveTo(axisPixelX, 0);
   ctx.lineTo(axisPixelX, H);
