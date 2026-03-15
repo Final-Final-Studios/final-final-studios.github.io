@@ -220,27 +220,33 @@ function tryMoveLion(i, newX) {
 }
 
 function stepLions(bunnyX, bunnyY) {
-  // Lion A (index 0) tracks bunny directly, Lion B (index 1) mirrors across axis
-  const offset = bunnyX - mirrorAxis;
-  const targetA = clamp(bunnyX - 1, 0, GRID_W - 2);
-  const targetB = clamp((mirrorAxis - offset) - 1, 0, GRID_W - 2); // mirrored
-
-  const targets = [targetA, targetB];
-
-  // Half speed: accumulator shared, add 0.5 per move
+  // Mirrored movement: lion A moves toward bunny, lion B mirrors (opposite direction)
+  // They share a single accumulator at half speed
   lions[0].acc += 0.5;
   if (lions[0].acc >= 1) {
     lions[0].acc -= 1;
-    for (let i = 0; i < lions.length; i++) {
-      const lion = lions[i];
-      const target = targets[i];
-      let newX = lion.x;
-      if (lion.x < target) newX = lion.x + 1;
-      else if (lion.x > target) newX = lion.x - 1;
-      if (newX !== lion.x) tryMoveLion(i, newX);
+
+    // Determine which direction lion A should move to approach bunny
+    const targetA = clamp(bunnyX - 1, 0, GRID_W - 2);
+    let stepDir = 0;
+    if (lions[0].x < targetA) stepDir = 1;
+    else if (lions[0].x > targetA) stepDir = -1;
+
+    if (stepDir !== 0) {
+      // Lion A moves toward bunny, Lion B mirrors (opposite direction)
+      const newA = clamp(lions[0].x + stepDir, 0, GRID_W - 2);
+      const newB = clamp(lions[1].x - stepDir, 0, GRID_W - 2);
+
+      // Check they won't overlap each other at new positions
+      const wouldOverlap = newA < newB + 2 && newA + 2 > newB &&
+                           lions[0].y < lions[1].y + 2 && lions[0].y + 2 > lions[1].y;
+
+      if (!wouldOverlap) {
+        lions[0].x = newA;
+        lions[1].x = newB;
+      }
     }
   }
-  // Keep accumulators in sync
   lions[1].acc = lions[0].acc;
 }
 
@@ -340,15 +346,20 @@ function draw() {
   ctx.fillRect((DOOR_X + DOOR_W) * CELL, 0, (GRID_W - DOOR_X - DOOR_W) * CELL, CELL);
 
   // Mirror axis (vertical line)
-  ctx.strokeStyle = 'rgba(78,120,180,0.25)';
-  ctx.lineWidth = 1;
-  ctx.setLineDash([4, 4]);
+  ctx.strokeStyle = 'rgba(120,160,220,0.5)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 4]);
   const axisPixelX = mirrorAxis * CELL + CELL / 2;
   ctx.beginPath();
   ctx.moveTo(axisPixelX, 0);
   ctx.lineTo(axisPixelX, H);
   ctx.stroke();
   ctx.setLineDash([]);
+  // Axis label
+  ctx.fillStyle = 'rgba(120,160,220,0.5)';
+  ctx.font = '9px "Courier New", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('AXIS', axisPixelX, H - 6);
 
   // Push zones (dashed)
   for (const lion of lions) {
