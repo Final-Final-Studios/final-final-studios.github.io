@@ -115,11 +115,11 @@ canvas { display: block; }
   <canvas id="canvas"></canvas>
   <div id="overlay">
     <div id="overlay-title">✦ 通過 ✦</div>
-    <div id="overlay-sub">YOU REACHED THE TEMPLE</div>
+    <div id="overlay-sub">YOU REACHED THE DOOR</div>
     <button id="retry-btn">TRY AGAIN</button>
   </div>
 </div>
-<div id="legend">🐰 YOU · 🦁 GUARDIAN · ⛩ GOAL · 🌿 BUSH · <span style="color:rgba(193,54,40,0.5)">· · · ·</span> PUSH</div>
+<div id="legend">🐰 YOU · 🦁 GUARDIAN · 🚪 DOOR · 🌿 BUSH · 🌳 TREE · ── FENCE</div>
 <div id="dpad">
   <div class="dpad-empty"></div>
   <div class="dpad-btn" data-dx="0" data-dy="-1">↑</div>
@@ -134,9 +134,15 @@ canvas { display: block; }
 
 <script>
 const GRID_W = 18;
-const GRID_H = 12;
+const GRID_H = 14;
 const DOOR_X = 7;
 const DOOR_W = 4;
+const FENCE_ROW = 3;
+const FENCE_GAP_START = 7;
+const FENCE_GAP_END = 10;
+const LION_STEP_MS = 350;
+const LION_FOLLOW_RANGE = 4;
+const LION_MAX_UP = 3;
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
@@ -144,25 +150,48 @@ const container = document.getElementById('game-container');
 const overlay = document.getElementById('overlay');
 
 let CELL = 32;
-let bunny, lions, status, lionTimer, bushes;
-const MIRROR_AXIS = 8; // fixed center axis, never moves
-const LION_STEP_MS = 350; // lions take a step every 350ms
+let bunny, lions, status, lionTimer, bushes, trees, fence;
+let prevMinDist = Infinity;
 
-// Bush positions — 3x3 blocks on left and right sides
+// Lion starting positions — symmetric across center
+const LION_A_ORIGIN = { x: 5, y: 7 };
+const LION_B_ORIGIN = { x: 11, y: 7 };
+
+// Bushes — top corners matching sketch
 const BUSH_LAYOUT = [
-  // Left 3x3 block (cols 0-2, rows 1-3)
+  // Left top corner
   {x:0,y:1},{x:1,y:1},{x:2,y:1},
-  {x:0,y:2},{x:1,y:2},{x:2,y:2},
-  {x:0,y:3},{x:1,y:3},{x:2,y:3},
-  // Right 3x3 block (cols 15-17, rows 1-3)
+  {x:1,y:2},
+  // Right top corner
   {x:15,y:1},{x:16,y:1},{x:17,y:1},
-  {x:15,y:2},{x:16,y:2},{x:17,y:2},
-  {x:15,y:3},{x:16,y:3},{x:17,y:3},
+  {x:16,y:2},
 ];
+
+// Trees — solid obstacles, rabbit can't pass
+const TREE_LAYOUT = [
+  // Left side above fence
+  {x:0,y:2},{x:2,y:2},
+  // Left side below fence
+  {x:1,y:5},{x:0,y:6},{x:0,y:8},
+  // Right side above fence
+  {x:15,y:2},{x:17,y:2},
+  // Right side below fence
+  {x:16,y:5},{x:17,y:6},{x:17,y:8},
+];
+
+function buildFence() {
+  const cells = new Set();
+  for (let x = 0; x < GRID_W; x++) {
+    if (x < FENCE_GAP_START || x > FENCE_GAP_END) {
+      cells.add(x + ',' + FENCE_ROW);
+    }
+  }
+  return cells;
+}
 
 function getCellSize() {
   const cw = Math.floor((Math.min(window.innerWidth - 32, 700)) / GRID_W);
-  const ch = Math.floor((window.innerHeight * 0.48) / GRID_H);
+  const ch = Math.floor((window.innerHeight * 0.50) / GRID_H);
   return Math.min(cw, ch);
 }
 
@@ -177,52 +206,76 @@ function resizeCanvas() {
 }
 
 function initState() {
-  bunny = { x: 8, y: 11 };
-  // Lions symmetric around MIRROR_AXIS=8: A center=3, B center=13
+  bunny = { x: 8, y: 12 };
   lions = [
-    { x: 2, y: 2 },
-    { x: 12, y: 2 }
+    { x: LION_A_ORIGIN.x, y: LION_A_ORIGIN.y },
+    { x: LION_B_ORIGIN.x, y: LION_B_ORIGIN.y }
   ];
   status = 'playing';
   overlay.style.display = 'none';
-  // Reset bushes
   bushes = new Set(BUSH_LAYOUT.map(b => b.x + ',' + b.y));
-  // Start time-based lion movement
+  trees = new Set(TREE_LAYOUT.map(t => t.x + ',' + t.y));
+  fence = buildFence();
+  prevMinDist = Infinity;
   if (lionTimer) clearInterval(lionTimer);
   lionTimer = setInterval(tickLions, LION_STEP_MS);
 }
 
-function clamp(v, lo, hi) {
-  return Math.max(lo, Math.min(hi, v));
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function hasTree(x, y) { return trees.has(x + ',' + y); }
+function hasBush(x, y) { return bushes.has(x + ',' + y); }
+function hasFence(x, y) { return fence.has(x + ',' + y); }
+
+// Blocked for bunny: trees, fence, bushes
+function bunnyBlocked(x, y) {
+  return hasTree(x, y) || hasFence(x, y) || hasBush(x, y);
 }
 
-function hasBush(x, y) {
-  return bushes.has(x + ',' + y);
+// Blocked for lion 2x2 body
+function lionBlockedAt(lx, ly) {
+  for (let dx = 0; dx <= 1; dx++) {
+    for (let dy = 0; dy <= 1; dy++) {
+      const cx = lx + dx, cy = ly + dy;
+      if (cx < 0 || cx >= GRID_W || cy < 0 || cy >= GRID_H) return true;
+      if (hasTree(cx, cy) || hasFence(cx, cy)) return true;
+    }
+  }
+  return false;
 }
 
 // Check if bunny overlaps a 2x2 lion body
 function bunnyOnLion(bx, by) {
   for (const lion of lions) {
-    if (bx >= lion.x && bx <= lion.x + 1 &&
-        by >= lion.y && by <= lion.y + 1) {
+    if (bx >= lion.x && bx <= lion.x + 1 && by >= lion.y && by <= lion.y + 1) {
       return lion;
     }
   }
   return null;
 }
 
-// Push bunny downward (toward bottom / in front of lion) — 3 cells
-function pushBunnyFrom(lion) {
+// Check if two 2x2 lions overlap
+function lionsWouldOverlap(ax, ay, bx, by) {
+  return ax < bx + 2 && ax + 2 > bx && ay < by + 2 && ay + 2 > by;
+}
+
+// Manhattan distance from bunny to nearest cell of a 2x2 lion
+function distToLion(lion) {
+  const cx = clamp(bunny.x, lion.x, lion.x + 1);
+  const cy = clamp(bunny.y, lion.y, lion.y + 1);
+  return Math.abs(bunny.x - cx) + Math.abs(bunny.y - cy);
+}
+
+// Push bunny downward — 3 cells
+function pushBunnyFrom() {
   bunny.y = clamp(bunny.y + 3, 0, GRID_H - 1);
 }
 
 // Check if bunny is in push zone (1-cell margin around lion body)
 function inPushZone(lion, bx, by) {
-  return bx >= lion.x - 1 && bx <= lion.x + 2 &&
-         by >= lion.y - 1 && by <= lion.y + 2;
+  return bx >= lion.x - 1 && bx <= lion.x + 2 && by >= lion.y - 1 && by <= lion.y + 2;
 }
 
-// Lions destroy any bushes they overlap
+// Lions crush bushes they overlap
 function lionsCrushBushes() {
   for (const lion of lions) {
     for (let dx = 0; dx <= 1; dx++) {
@@ -233,62 +286,101 @@ function lionsCrushBushes() {
   }
 }
 
-// Time-based lion tick — lion A tracks bunny, lion B mirrors across axis
 function tickLions() {
   if (status !== 'playing') return;
 
-  // Helper: check if two 2x2 lions would overlap (same row, side by side only)
-  function lionsOverlap(ax, bx) {
-    return ax < bx + 2 && ax + 2 > bx;
-  }
+  const lionA = lions[0];
+  const lionB = lions[1];
 
-  // Keep lions on the same row (no vertical stacking)
-  lions[0].y = lions[1].y;
+  const distA = distToLion(lionA);
+  const distB = distToLion(lionB);
+  const minDist = Math.min(distA, distB);
 
-  // Lion A moves one step toward bunny
-  const targetA = clamp(bunny.x - 1, 0, GRID_W - 2);
-  let newA = lions[0].x;
-  if (lions[0].x < targetA) newA++;
-  else if (lions[0].x > targetA) newA--;
-  newA = clamp(newA, 0, GRID_W - 2);
+  if (minDist > LION_FOLLOW_RANGE) {
+    // Disengage — return to original positions
+    returnToOrigin(lionA, LION_A_ORIGIN, lionB);
+    returnToOrigin(lionB, LION_B_ORIGIN, lionA);
+  } else {
+    // Chase mode — horizontal tracking with mirror
+    // Lion A moves horizontally toward bunny
+    const targetAx = clamp(bunny.x - 1, 0, GRID_W - 2);
+    let newAx = lionA.x;
+    if (lionA.x < targetAx) newAx++;
+    else if (lionA.x > targetAx) newAx--;
+    newAx = clamp(newAx, 0, GRID_W - 2);
 
-  // Only move A if it won't overlap B
-  if (!lionsOverlap(newA, lions[1].x)) {
-    lions[0].x = newA;
-  }
+    if (!lionsWouldOverlap(newAx, lionA.y, lionB.x, lionB.y) && !lionBlockedAt(newAx, lionA.y)) {
+      lionA.x = newAx;
+    }
 
-  // Lion B mirrors lion A across the fixed axis
-  const targetB = clamp(2 * MIRROR_AXIS - lions[0].x - 2, 0, GRID_W - 2);
+    // Lion B mirrors lion A across center axis: B.x = (GRID_W - 2) - A.x
+    const mirrorBx = clamp((GRID_W - 2) - lionA.x, 0, GRID_W - 2);
+    let newBx = lionB.x;
+    if (lionB.x < mirrorBx) newBx++;
+    else if (lionB.x > mirrorBx) newBx--;
+    newBx = clamp(newBx, 0, GRID_W - 2);
 
-  // Move lion B one step toward its mirror target
-  let newB = lions[1].x;
-  if (lions[1].x < targetB) newB++;
-  else if (lions[1].x > targetB) newB--;
-  newB = clamp(newB, 0, GRID_W - 2);
+    if (!lionsWouldOverlap(lionA.x, lionA.y, newBx, lionB.y) && !lionBlockedAt(newBx, lionB.y)) {
+      lionB.x = newBx;
+    }
 
-  // Only move B if it won't overlap A
-  if (!lionsOverlap(lions[0].x, newB)) {
-    lions[1].x = newB;
-  }
-
-  // Lions crush bushes they walk over
-  lionsCrushBushes();
-
-  // After lions move, push bunny if overlapping lion body
-  let pushed = true;
-  let safety = 5;
-  while (pushed && safety-- > 0) {
-    pushed = false;
-    for (const lion of lions) {
-      if (bunnyOnLion(bunny.x, bunny.y)) {
-        pushBunnyFrom(lion);
-        pushed = true;
+    // Vertical: lions can move UP (never down) if bunny is above them
+    // Capped at LION_MAX_UP above origin, and can't cross fence
+    const minAllowedY = Math.max(LION_A_ORIGIN.y - LION_MAX_UP, FENCE_ROW + 1);
+    if (bunny.y < lionA.y && lionA.y > minAllowedY) {
+      const newY = lionA.y - 1;
+      if (!lionBlockedAt(lionA.x, newY) && !lionBlockedAt(lionB.x, newY)) {
+        lionA.y = newY;
+        lionB.y = newY;
       }
     }
   }
 
+  // Enforce same row always
+  lionB.y = lionA.y;
+
+  lionsCrushBushes();
+
+  // Push bunny if overlapping lion body
+  let pushed = true;
+  let safety = 5;
+  while (pushed && safety-- > 0) {
+    pushed = false;
+    if (bunnyOnLion(bunny.x, bunny.y)) {
+      pushBunnyFrom();
+      pushed = true;
+    }
+  }
+
+  prevMinDist = minDist;
   checkWin();
   draw();
+}
+
+function returnToOrigin(lion, origin, otherLion) {
+  // Move one step toward origin (can move any direction when returning)
+  let newX = lion.x;
+  let newY = lion.y;
+
+  if (lion.x < origin.x) newX++;
+  else if (lion.x > origin.x) newX--;
+
+  if (lion.y < origin.y) newY++;
+  else if (lion.y > origin.y) newY--;
+
+  newX = clamp(newX, 0, GRID_W - 2);
+  newY = clamp(newY, 0, GRID_H - 2);
+
+  // Try horizontal move
+  if (!lionsWouldOverlap(newX, lion.y, otherLion.x, otherLion.y) && !lionBlockedAt(newX, lion.y)) {
+    lion.x = newX;
+  }
+  // Try vertical move
+  if (newY !== lion.y) {
+    if (!lionsWouldOverlap(lion.x, newY, otherLion.x, otherLion.y) && !lionBlockedAt(lion.x, newY)) {
+      lion.y = newY;
+    }
+  }
 }
 
 function checkWin() {
@@ -305,14 +397,14 @@ function move(dx, dy) {
   let nx = clamp(bunny.x + dx, 0, GRID_W - 1);
   let ny = clamp(bunny.y + dy, 0, GRID_H - 1);
 
-  // Don't allow moving onto a lion body
-  if (bunnyOnLion(nx, ny)) {
+  // Blocked by trees, fence, bushes
+  if (bunnyBlocked(nx, ny)) {
     nx = bunny.x;
     ny = bunny.y;
   }
 
-  // Don't allow moving onto a bush
-  if (hasBush(nx, ny)) {
+  // Blocked by lion body
+  if (bunnyOnLion(nx, ny)) {
     nx = bunny.x;
     ny = bunny.y;
   }
@@ -323,7 +415,7 @@ function move(dx, dy) {
   // Push bunny if in push zone after moving
   for (const lion of lions) {
     if (inPushZone(lion, bunny.x, bunny.y)) {
-      pushBunnyFrom(lion);
+      pushBunnyFrom();
     }
   }
 
@@ -371,7 +463,7 @@ function draw() {
     }
   }
 
-  // Temple door
+  // Door
   const doorGrad = ctx.createLinearGradient(DOOR_X * CELL, 0, (DOOR_X + DOOR_W) * CELL, CELL);
   doorGrad.addColorStop(0, '#2e6b5a');
   doorGrad.addColorStop(1, '#4aad8a');
@@ -380,19 +472,47 @@ function draw() {
   ctx.strokeStyle = '#4aad8a';
   ctx.lineWidth = 1;
   ctx.strokeRect(DOOR_X * CELL, 0, DOOR_W * CELL, CELL);
-
-  // Door text
   ctx.fillStyle = '#0b0f1c';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  const doorFontSize = Math.max(10, CELL * 0.45);
-  ctx.font = doorFontSize + 'px "Courier New", monospace';
-  ctx.fillText('⛩ 门', (DOOR_X + DOOR_W / 2) * CELL, CELL / 2);
+  ctx.font = Math.max(10, CELL * 0.45) + 'px "Courier New", monospace';
+  ctx.fillText('🚪 door', (DOOR_X + DOOR_W / 2) * CELL, CELL / 2);
 
   // Flanking walls
   ctx.fillStyle = '#0d1020';
   ctx.fillRect(0, 0, DOOR_X * CELL, CELL);
   ctx.fillRect((DOOR_X + DOOR_W) * CELL, 0, (GRID_W - DOOR_X - DOOR_W) * CELL, CELL);
+
+  // Fence
+  const fenceY = FENCE_ROW * CELL + CELL / 2;
+  ctx.strokeStyle = '#8B6914';
+  ctx.lineWidth = 3;
+  ctx.setLineDash([]);
+  // Left section
+  if (FENCE_GAP_START > 0) {
+    ctx.beginPath();
+    ctx.moveTo(0, fenceY);
+    ctx.lineTo(FENCE_GAP_START * CELL, fenceY);
+    ctx.stroke();
+  }
+  // Right section
+  if (FENCE_GAP_END < GRID_W - 1) {
+    ctx.beginPath();
+    ctx.moveTo((FENCE_GAP_END + 1) * CELL, fenceY);
+    ctx.lineTo(GRID_W * CELL, fenceY);
+    ctx.stroke();
+  }
+  // Fence posts
+  ctx.fillStyle = '#8B6914';
+  for (let x = 0; x < GRID_W; x++) {
+    if (x < FENCE_GAP_START || x > FENCE_GAP_END) {
+      const px = x * CELL + CELL / 2;
+      ctx.fillRect(px - 2, fenceY - CELL * 0.3, 4, CELL * 0.6);
+    }
+  }
+  // Gap indicator
+  ctx.fillStyle = 'rgba(74, 173, 138, 0.15)';
+  ctx.fillRect(FENCE_GAP_START * CELL, FENCE_ROW * CELL, (FENCE_GAP_END - FENCE_GAP_START + 1) * CELL, CELL);
 
   // Bushes
   for (const key of bushes) {
@@ -404,71 +524,126 @@ function draw() {
     ctx.strokeStyle = '#2e6b4a';
     ctx.lineWidth = 1;
     ctx.strokeRect(px + 1, py + 1, CELL - 2, CELL - 2);
-    const bushSize = Math.max(10, CELL * 0.55);
-    ctx.font = bushSize + 'px serif';
+    ctx.font = Math.max(10, CELL * 0.55) + 'px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('🌿', px + CELL / 2, py + CELL / 2);
   }
 
-  // Mirror axis (vertical line)
-  ctx.strokeStyle = 'rgba(120,160,220,0.5)';
-  ctx.lineWidth = 2;
-  ctx.setLineDash([6, 4]);
-  const axisPixelX = MIRROR_AXIS * CELL + CELL / 2;
+  // Trees
+  for (const key of trees) {
+    const [tx, ty] = key.split(',').map(Number);
+    const px = tx * CELL;
+    const py = ty * CELL;
+    // Tree trunk
+    ctx.fillStyle = '#3d2b1a';
+    const trunkW = CELL * 0.2;
+    ctx.fillRect(px + CELL / 2 - trunkW / 2, py + CELL * 0.5, trunkW, CELL * 0.5);
+    // Tree canopy
+    ctx.fillStyle = '#1a4a20';
+    ctx.beginPath();
+    ctx.arc(px + CELL / 2, py + CELL * 0.4, CELL * 0.38, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#2e7a3a';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    // Emoji
+    ctx.font = Math.max(10, CELL * 0.5) + 'px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🌳', px + CELL / 2, py + CELL / 2);
+  }
+
+  // Mirror axes
+  // Vertical axis (horizontal mirror)
+  const axisX = GRID_W * CELL / 2;
+  ctx.strokeStyle = 'rgba(120,160,220,0.3)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 6]);
   ctx.beginPath();
-  ctx.moveTo(axisPixelX, 0);
-  ctx.lineTo(axisPixelX, H);
+  ctx.moveTo(axisX, CELL);
+  ctx.lineTo(axisX, H);
   ctx.stroke();
   ctx.setLineDash([]);
-  // Axis label
-  ctx.fillStyle = 'rgba(120,160,220,0.5)';
-  ctx.font = '9px "Courier New", monospace';
+  ctx.fillStyle = 'rgba(120,160,220,0.3)';
+  ctx.font = '8px "Courier New", monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('AXIS', axisPixelX, H - 6);
+  ctx.fillText('MIRROR', axisX, H - 4);
 
-  // Push zones (dashed)
-  for (const lion of lions) {
-    const zx = (lion.x - 1) * CELL;
-    const zy = (lion.y - 1) * CELL;
-    const zw = 4 * CELL;
-    const zh = 4 * CELL;
-    ctx.strokeStyle = 'rgba(193,54,40,0.25)';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([4, 4]);
-    ctx.strokeRect(zx, zy, zw, zh);
-    ctx.setLineDash([]);
+  // Horizontal axis (vertical mirror) — visual only
+  const axisY = (LION_A_ORIGIN.y + 1) * CELL;
+  ctx.strokeStyle = 'rgba(220,160,120,0.2)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 6]);
+  ctx.beginPath();
+  ctx.moveTo(0, axisY);
+  ctx.lineTo(W, axisY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Lion follow range indicator (subtle)
+  const minDist = Math.min(distToLion(lions[0]), distToLion(lions[1]));
+  const following = minDist <= LION_FOLLOW_RANGE;
+
+  // Push zones (dashed) — only when following
+  if (following) {
+    for (const lion of lions) {
+      const zx = (lion.x - 1) * CELL;
+      const zy = (lion.y - 1) * CELL;
+      const zw = 4 * CELL;
+      const zh = 4 * CELL;
+      ctx.strokeStyle = 'rgba(193,54,40,0.25)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(zx, zy, zw, zh);
+      ctx.setLineDash([]);
+    }
   }
 
   // Lions
-  for (const lion of lions) {
+  for (let i = 0; i < lions.length; i++) {
+    const lion = lions[i];
     const lx = lion.x * CELL;
     const ly = lion.y * CELL;
     const lw = 2 * CELL;
     const lh = 2 * CELL;
+
+    // Body
     const lionGrad = ctx.createLinearGradient(lx, ly, lx, ly + lh);
-    lionGrad.addColorStop(0, '#7a6548');
-    lionGrad.addColorStop(0.5, '#5c4a30');
-    lionGrad.addColorStop(1, '#3e3020');
+    if (following) {
+      lionGrad.addColorStop(0, '#7a6548');
+      lionGrad.addColorStop(0.5, '#5c4a30');
+      lionGrad.addColorStop(1, '#3e3020');
+    } else {
+      // Dimmer when disengaged
+      lionGrad.addColorStop(0, '#4a4538');
+      lionGrad.addColorStop(0.5, '#3c3a30');
+      lionGrad.addColorStop(1, '#2e2820');
+    }
     roundRect(ctx, lx + 2, ly + 2, lw - 4, lh - 4, 6);
     ctx.fillStyle = lionGrad;
     ctx.fill();
-    ctx.strokeStyle = '#a08060';
+    ctx.strokeStyle = following ? '#a08060' : '#605840';
     ctx.lineWidth = 1;
     ctx.stroke();
 
     // Lion emoji
-    const lionEmoji = Math.max(12, CELL * 0.7);
-    ctx.font = lionEmoji + 'px serif';
+    ctx.font = Math.max(12, CELL * 0.7) + 'px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('🦁', lx + lw / 2, ly + lh / 2 - CELL * 0.15);
 
     // Label
-    const labelSize = Math.max(8, CELL * 0.3);
-    ctx.font = labelSize + 'px "Courier New", monospace';
-    ctx.fillStyle = '#a08060';
+    ctx.font = Math.max(8, CELL * 0.3) + 'px "Courier New", monospace';
+    ctx.fillStyle = following ? '#a08060' : '#605840';
     ctx.fillText('石獅', lx + lw / 2, ly + lh / 2 + CELL * 0.4);
+
+    // Status indicator
+    if (!following) {
+      ctx.font = Math.max(7, CELL * 0.25) + 'px "Courier New", monospace';
+      ctx.fillStyle = '#556070';
+      ctx.fillText('zzz', lx + lw / 2, ly - 4);
+    }
   }
 
   // Bunny
@@ -485,10 +660,7 @@ function draw() {
   ctx.strokeStyle = '#f0e4d0';
   ctx.lineWidth = 1.5;
   ctx.stroke();
-
-  // Bunny emoji
-  const bunnyEmoji = Math.max(10, CELL * 0.55);
-  ctx.font = bunnyEmoji + 'px serif';
+  ctx.font = Math.max(10, CELL * 0.55) + 'px serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText('🐰', bx, by);
@@ -513,16 +685,10 @@ document.querySelectorAll('.dpad-btn').forEach(function(btn) {
   btn.addEventListener('pointerdown', function(e) {
     e.preventDefault();
     btn.classList.add('active');
-    const dx = parseInt(btn.dataset.dx);
-    const dy = parseInt(btn.dataset.dy);
-    move(dx, dy);
+    move(parseInt(btn.dataset.dx), parseInt(btn.dataset.dy));
   });
-  btn.addEventListener('pointerup', function() {
-    btn.classList.remove('active');
-  });
-  btn.addEventListener('pointerleave', function() {
-    btn.classList.remove('active');
-  });
+  btn.addEventListener('pointerup', function() { btn.classList.remove('active'); });
+  btn.addEventListener('pointerleave', function() { btn.classList.remove('active'); });
 });
 
 // Retry button
@@ -531,7 +697,6 @@ document.getElementById('retry-btn').addEventListener('click', function() {
   draw();
 });
 
-// Resize handler
 window.addEventListener('resize', resizeCanvas);
 
 // Boot
