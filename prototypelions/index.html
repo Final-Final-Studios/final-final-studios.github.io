@@ -237,10 +237,13 @@ function lionsCrushBushes() {
 function tickLions() {
   if (status !== 'playing') return;
 
-  // Helper: check if two 2x2 lions would overlap
-  function lionsOverlap(ax, ay, bx, by) {
-    return ax < bx + 2 && ax + 2 > bx && ay < by + 2 && ay + 2 > by;
+  // Helper: check if two 2x2 lions would overlap (same row, side by side only)
+  function lionsOverlap(ax, bx) {
+    return ax < bx + 2 && ax + 2 > bx;
   }
+
+  // Keep lions on the same row (no vertical stacking)
+  lions[0].y = lions[1].y;
 
   // Lion A moves one step toward bunny
   const targetA = clamp(bunny.x - 1, 0, GRID_W - 2);
@@ -250,7 +253,7 @@ function tickLions() {
   newA = clamp(newA, 0, GRID_W - 2);
 
   // Only move A if it won't overlap B
-  if (!lionsOverlap(newA, lions[0].y, lions[1].x, lions[1].y)) {
+  if (!lionsOverlap(newA, lions[1].x)) {
     lions[0].x = newA;
   }
 
@@ -264,7 +267,7 @@ function tickLions() {
   newB = clamp(newB, 0, GRID_W - 2);
 
   // Only move B if it won't overlap A
-  if (!lionsOverlap(lions[0].x, lions[0].y, newB, lions[1].y)) {
+  if (!lionsOverlap(lions[0].x, newB)) {
     lions[1].x = newB;
   }
 
