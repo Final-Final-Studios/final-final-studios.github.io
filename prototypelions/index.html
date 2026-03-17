@@ -120,7 +120,7 @@ canvas { display: block; }
   </div>
 </div>
 <div id="legend">🐰 YOU · 🦁 GUARDIAN · 🚪 DOOR · 🌿 BUSH · 🌳 TREE · ── FENCE</div>
-<div style="color:#2e3a50;font-size:9px;letter-spacing:2px;text-align:center;margin-top:4px;font-family:'Courier New',monospace;">v1.0</div>
+<div style="color:#2e3a50;font-size:9px;letter-spacing:2px;text-align:center;margin-top:4px;font-family:'Courier New',monospace;">v1.1</div>
 <div id="dpad">
   <div class="dpad-empty"></div>
   <div class="dpad-btn" data-dx="0" data-dy="-1">↑</div>
@@ -138,12 +138,12 @@ const GRID_W = 18;
 const GRID_H = 14;
 const DOOR_X = 7;
 const DOOR_W = 4;
-const FENCE_ROW = 3;
-const FENCE_GAP_START = 7;
-const FENCE_GAP_END = 10;
+const FENCE_ROW = 4;
+const FENCE_GAP_START = 6;
+const FENCE_GAP_END = 11;
 const LION_STEP_MS = 350;
-const LION_FOLLOW_RANGE = 4;
-const LION_MAX_UP = 3;
+const LION_H_RANGE = 14;  // Long horizontal activation range
+const LION_V_MAX = 6;     // Deactivate if >6 cells vertically from origin
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
@@ -152,40 +152,60 @@ const overlay = document.getElementById('overlay');
 
 let CELL = 32;
 let bunny, lions, status, lionTimer, bushes, trees, fence;
-let prevMinDist = Infinity;
 
-// Lion starting positions — symmetric across center
-const LION_A_ORIGIN = { x: 5, y: 7 };
-const LION_B_ORIGIN = { x: 11, y: 7 };
+// Lion starting positions — behind the fence, inside the pen
+const LION_A_ORIGIN = { x: 7, y: 5 };
+const LION_B_ORIGIN = { x: 10, y: 5 };
 
 // Bushes — top corners matching sketch
 const BUSH_LAYOUT = [
-  // Left top corner
-  {x:0,y:1},{x:1,y:1},{x:2,y:1},
-  {x:1,y:2},
-  // Right top corner
-  {x:15,y:1},{x:16,y:1},{x:17,y:1},
-  {x:16,y:2},
+  // Left top corner (row 1-2)
+  {x:0,y:1},{x:1,y:1},
+  {x:0,y:2},{x:1,y:2},{x:2,y:2},{x:3,y:2},
+  // Right top corner (row 1-2)
+  {x:16,y:1},{x:17,y:1},
+  {x:14,y:2},{x:15,y:2},{x:16,y:2},{x:17,y:2},
 ];
 
-// Trees — solid obstacles, rabbit can't pass
+// Trees — solid obstacles matching sketch
 const TREE_LAYOUT = [
-  // Left side above fence
-  {x:0,y:2},{x:2,y:2},
-  // Left side below fence
-  {x:1,y:5},{x:0,y:6},{x:0,y:8},
-  // Right side above fence
-  {x:15,y:2},{x:17,y:2},
-  // Right side below fence
-  {x:16,y:5},{x:17,y:6},{x:17,y:8},
+  // Row 3 — above fence, flanking
+  {x:0,y:3},{x:1,y:3},{x:2,y:3},{x:3,y:3},{x:4,y:3},
+  {x:13,y:3},{x:14,y:3},{x:15,y:3},{x:16,y:3},{x:17,y:3},
+  // Row 5 — pen bottom sides
+  {x:2,y:6},{x:3,y:6},
+  {x:15,y:6},{x:16,y:6},
+  // Row 6
+  {x:4,y:7},
+  {x:15,y:7},{x:16,y:7},{x:17,y:7},
+  // Row 7
+  {x:0,y:8},{x:1,y:8},{x:2,y:8},
+  {x:14,y:8},{x:15,y:8},{x:16,y:8},{x:17,y:8},
+  // Row 8
+  {x:0,y:9},{x:1,y:9},{x:2,y:9},
+  {x:13,y:9},{x:14,y:9},{x:16,y:9},{x:17,y:9},
+];
+
+// Additional fence cells forming the lion pen walls
+const PEN_FENCE = [
+  // Row 4 side walls
+  {x:5,y:4},{x:12,y:4},
+  // Row 5 bottom walls (avoid lion starting positions at x:7-8 and x:10-11)
+  {x:4,y:6},{x:5,y:6},{x:6,y:6},
+  {x:12,y:6},{x:13,y:6},{x:14,y:6},
 ];
 
 function buildFence() {
   const cells = new Set();
+  // Main horizontal fence (row 4)
   for (let x = 0; x < GRID_W; x++) {
     if (x < FENCE_GAP_START || x > FENCE_GAP_END) {
       cells.add(x + ',' + FENCE_ROW);
     }
+  }
+  // Pen fence cells
+  for (const p of PEN_FENCE) {
+    cells.add(p.x + ',' + p.y);
   }
   return cells;
 }
@@ -207,7 +227,7 @@ function resizeCanvas() {
 }
 
 function initState() {
-  bunny = { x: 8, y: 12 };
+  bunny = { x: 9, y: 11 };
   lions = [
     { x: LION_A_ORIGIN.x, y: LION_A_ORIGIN.y },
     { x: LION_B_ORIGIN.x, y: LION_B_ORIGIN.y }
@@ -217,7 +237,6 @@ function initState() {
   bushes = new Set(BUSH_LAYOUT.map(b => b.x + ',' + b.y));
   trees = new Set(TREE_LAYOUT.map(t => t.x + ',' + t.y));
   fence = buildFence();
-  prevMinDist = Infinity;
   if (lionTimer) clearInterval(lionTimer);
   lionTimer = setInterval(tickLions, LION_STEP_MS);
 }
@@ -293,17 +312,20 @@ function tickLions() {
   const lionA = lions[0];
   const lionB = lions[1];
 
-  const distA = distToLion(lionA);
-  const distB = distToLion(lionB);
-  const minDist = Math.min(distA, distB);
+  // Horizontal distance to nearest lion edge
+  const hDistA = Math.max(0, Math.max(lionA.x - bunny.x, bunny.x - (lionA.x + 1)));
+  const hDistB = Math.max(0, Math.max(lionB.x - bunny.x, bunny.x - (lionB.x + 1)));
+  const minHDist = Math.min(hDistA, hDistB);
 
-  if (minDist > LION_FOLLOW_RANGE) {
-    // Disengage — return to original positions
+  // Vertical displacement from origin
+  const vDisp = Math.abs(lionA.y - LION_A_ORIGIN.y);
+
+  // Activate with long horizontal range; deactivate if too far vertically
+  if (minHDist > LION_H_RANGE || vDisp > LION_V_MAX) {
     returnToOrigin(lionA, LION_A_ORIGIN, lionB);
     returnToOrigin(lionB, LION_B_ORIGIN, lionA);
   } else {
     // Chase mode — horizontal tracking with mirror
-    // Lion A moves horizontally toward bunny
     const targetAx = clamp(bunny.x - 1, 0, GRID_W - 2);
     let newAx = lionA.x;
     if (lionA.x < targetAx) newAx++;
@@ -314,7 +336,7 @@ function tickLions() {
       lionA.x = newAx;
     }
 
-    // Lion B mirrors lion A across center axis: B.x = (GRID_W - 2) - A.x
+    // Lion B mirrors lion A across center axis
     const mirrorBx = clamp((GRID_W - 2) - lionA.x, 0, GRID_W - 2);
     let newBx = lionB.x;
     if (lionB.x < mirrorBx) newBx++;
@@ -325,11 +347,18 @@ function tickLions() {
       lionB.x = newBx;
     }
 
-    // Vertical: lions can move UP (never down) if bunny is above them
-    // Capped at LION_MAX_UP above origin, and can't cross fence
-    const minAllowedY = Math.max(LION_A_ORIGIN.y - LION_MAX_UP, FENCE_ROW + 1);
-    if (bunny.y < lionA.y && lionA.y > minAllowedY) {
+    // Vertical: move toward bunny, capped by LION_V_MAX from origin
+    const minAllowedY = LION_A_ORIGIN.y - LION_V_MAX;
+    const maxAllowedY = LION_A_ORIGIN.y + LION_V_MAX;
+
+    if (bunny.y < lionA.y && lionA.y - 1 >= minAllowedY) {
       const newY = lionA.y - 1;
+      if (!lionBlockedAt(lionA.x, newY) && !lionBlockedAt(lionB.x, newY)) {
+        lionA.y = newY;
+        lionB.y = newY;
+      }
+    } else if (bunny.y > lionA.y + 1 && lionA.y + 1 <= maxAllowedY) {
+      const newY = lionA.y + 1;
       if (!lionBlockedAt(lionA.x, newY) && !lionBlockedAt(lionB.x, newY)) {
         lionA.y = newY;
         lionB.y = newY;
@@ -353,7 +382,6 @@ function tickLions() {
     }
   }
 
-  prevMinDist = minDist;
   checkWin();
   draw();
 }
@@ -484,32 +512,44 @@ function draw() {
   ctx.fillRect(0, 0, DOOR_X * CELL, CELL);
   ctx.fillRect((DOOR_X + DOOR_W) * CELL, 0, (GRID_W - DOOR_X - DOOR_W) * CELL, CELL);
 
-  // Fence
-  const fenceY = FENCE_ROW * CELL + CELL / 2;
+  // Fence — draw all fence cells
   ctx.strokeStyle = '#8B6914';
   ctx.lineWidth = 3;
   ctx.setLineDash([]);
-  // Left section
+  // Main horizontal fence line
+  const fenceY = FENCE_ROW * CELL + CELL / 2;
   if (FENCE_GAP_START > 0) {
     ctx.beginPath();
     ctx.moveTo(0, fenceY);
     ctx.lineTo(FENCE_GAP_START * CELL, fenceY);
     ctx.stroke();
   }
-  // Right section
   if (FENCE_GAP_END < GRID_W - 1) {
     ctx.beginPath();
     ctx.moveTo((FENCE_GAP_END + 1) * CELL, fenceY);
     ctx.lineTo(GRID_W * CELL, fenceY);
     ctx.stroke();
   }
-  // Fence posts
+  // Fence posts on main row
   ctx.fillStyle = '#8B6914';
   for (let x = 0; x < GRID_W; x++) {
     if (x < FENCE_GAP_START || x > FENCE_GAP_END) {
       const px = x * CELL + CELL / 2;
       ctx.fillRect(px - 2, fenceY - CELL * 0.3, 4, CELL * 0.6);
     }
+  }
+  // Pen fence cells (side walls + bottom walls)
+  for (const p of PEN_FENCE) {
+    const px = p.x * CELL;
+    const py = p.y * CELL;
+    ctx.fillStyle = '#8B6914';
+    ctx.fillRect(px + 2, py + 2, CELL - 4, CELL - 4);
+    ctx.strokeStyle = '#a07a1a';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px + 2, py + 2, CELL - 4, CELL - 4);
+    // Fence post
+    ctx.fillStyle = '#6a5010';
+    ctx.fillRect(px + CELL / 2 - 2, py + CELL * 0.2, 4, CELL * 0.6);
   }
   // Gap indicator
   ctx.fillStyle = 'rgba(74, 173, 138, 0.15)';
@@ -583,8 +623,11 @@ function draw() {
   ctx.setLineDash([]);
 
   // Lion follow range indicator (subtle)
-  const minDist = Math.min(distToLion(lions[0]), distToLion(lions[1]));
-  const following = minDist <= LION_FOLLOW_RANGE;
+  const hDist0 = Math.max(0, Math.max(lions[0].x - bunny.x, bunny.x - (lions[0].x + 1)));
+  const hDist1 = Math.max(0, Math.max(lions[1].x - bunny.x, bunny.x - (lions[1].x + 1)));
+  const minHDist = Math.min(hDist0, hDist1);
+  const vDisp = Math.abs(lions[0].y - LION_A_ORIGIN.y);
+  const following = minHDist <= LION_H_RANGE && vDisp <= LION_V_MAX;
 
   // Push zones (dashed) — only when following
   if (following) {
