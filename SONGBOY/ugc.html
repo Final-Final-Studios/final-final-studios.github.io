@@ -1,0 +1,12 @@
+<p>Opening SONGBOY in Steam...</p>
+<p>Didn't work? <a href="https://store.steampowered.com/app/4342020">
+  Get it on Steam</a></p>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const ugcId = params.get('ugc_id');
+
+  window.location = ugcId
+    ? `steam://run/4342020//?ugc_id=${ugcId};`
+    : `steam://run/4342020`;
+</script>
