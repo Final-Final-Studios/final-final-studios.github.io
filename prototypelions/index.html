@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Immortal's Way — Lion Puzzle Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0b0f1c;
+            color: #c4b89a;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            touch-action: manipulation;
+            min-height: 100vh;
+            padding: 10px 0;
+        }
+
+        #title {
+            color: #c13628;
+            font-size: 11px;
+            letter-spacing: 6px;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        #subtitle {
+            color: #2e3a50;
+            font-size: 10px;
+            text-align: center;
+            letter-spacing: 2px;
+            margin: 4px 0 8px 0;
+            line-height: 1.5;
+        }
+
+        #game-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 13, 22, 0.93);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        #overlay-title {
+            color: #4aad8a;
+            font-size: 28px;
+            letter-spacing: 6px;
+            font-family: 'Courier New', monospace;
+        }
+
+        #overlay-sub {
+            color: #556070;
+            font-size: 11px;
+            letter-spacing: 3px;
+            margin: 12px 0 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        #retry-btn {
+            background: transparent;
+            border: 1px solid #c13628;
+            color: #c13628;
+            font-size: 11px;
+            letter-spacing: 4px;
+            font-family: 'Courier New', monospace;
+            padding: 8px 24px;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        #retry-btn:hover {
+            background: rgba(193, 54, 40, 0.15);
+        }
+
+        #legend {
+            font-size: 10px;
+            color: #2e3a50;
+            text-align: center;
+            margin: 8px 0;
+            letter-spacing: 1px;
+        }
+
+        #dpad {
+            display: grid;
+            grid-template-columns: 52px 52px 52px;
+            grid-template-rows: 52px 52px 52px;
+            gap: 5px;
+            margin-top: 4px;
+        }
+
+        .dpad-btn {
+            width: 52px;
+            height: 52px;
+            background: #1c2236;
+            border: 1px solid #2e3a5a;
+            color: #c4b89a;
+            font-size: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .dpad-btn:active,
+        .dpad-btn.active {
+            background: #c13628;
+        }
+
+        .dpad-empty {
+            width: 52px;
+            height: 52px;
+        }
+    </style>
+</head>
+<body>
+    <div id="title">&#10022; &#36890;&#36942; &#10022;</div>
+    <div id="subtitle">Lion Puzzle Prototype</div>
+
+    <div id="game-container">
+        <canvas id="canvas"></canvas>
+        <div id="overlay">
+            <div id="overlay-title">YOU REACHED THE TEMPLE</div>
+            <div id="overlay-sub">&#10022; &#36890;&#36942; &#10022;</div>
+            <button id="retry-btn">TRY AGAIN</button>
+        </div>
+    </div>
+
+    <div id="legend">&#x1F430; YOU &middot; &#x1F981; GUARDIAN &middot; &#x26E9; GOAL &middot; &#x1F33F; BUSH &middot; &#x1F333; TREE &middot; &#9473; FENCE</div>
+
+    <div id="dpad">
+        <div class="dpad-empty"></div>
+        <button class="dpad-btn" data-dx="0" data-dy="-1">&uarr;</button>
+        <div class="dpad-empty"></div>
+        <button class="dpad-btn" data-dx="-1" data-dy="0">&larr;</button>
+        <div class="dpad-empty"></div>
+        <button class="dpad-btn" data-dx="1" data-dy="0">&rarr;</button>
+        <div class="dpad-empty"></div>
+        <button class="dpad-btn" data-dx="0" data-dy="1">&darr;</button>
+        <div class="dpad-empty"></div>
+    </div>
+
+    <script>
+        const GRID_W = 18;
+        const GRID_H = 12;
+        const DOOR_X = 7;
+        const DOOR_W = 4;
+        const FENCE_ROW = 5;
+        const FENCE_GAP_X = 7;
+        const FENCE_GAP_W = 4;
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('game-container');
+        const overlay = document.getElementById('overlay');
+
+        let CELL = 32;
+        let bunny, lions, status, lionTimer, bushes, trees;
+        const MIRROR_AXIS = 8;
+        const LION_STEP_MS = 400;
+
+        // Bushes behind fence — lions can destroy these
+        const BUSH_LAYOUT = [
+            {x:0,y:1},{x:1,y:1},{x:2,y:1},
+            {x:0,y:2},{x:1,y:2},
+            {x:0,y:3},{x:1,y:3},
+            {x:15,y:1},{x:16,y:1},{x:17,y:1},
+            {x:16,y:2},{x:17,y:2},
+            {x:16,y:3},{x:17,y:3},
+        ];
+
+        // Trees — indestructible, block all movement
+        const TREE_LAYOUT = [
+            // Below fence, left side
+            {x:0,y:7},{x:1,y:7},
+            {x:1,y:9},
+            {x:0,y:10},
+            // Below fence, right side
+            {x:16,y:7},{x:17,y:7},
+            {x:16,y:9},
+            {x:17,y:10},
+        ];
+
+        function getCellSize() {
+            const cw = Math.floor((Math.min(window.innerWidth - 32, 700)) / GRID_W);
+            const ch = Math.floor((window.innerHeight * 0.48) / GRID_H);
+            return Math.min(cw, ch);
+        }
+
+        function resizeCanvas() {
+            CELL = getCellSize();
+            if (CELL < 10) CELL = 10;
+            canvas.width = GRID_W * CELL;
+            canvas.height = GRID_H * CELL;
+            container.style.width = canvas.width + 'px';
+            container.style.height = canvas.height + 'px';
+            draw();
+        }
+
+        function initState() {
+            bunny = { x: 8, y: 10 };
+            lions = [
+                { x: 3, y: 2 },
+                { x: 13, y: 2 }
+            ];
+            status = 'playing';
+            overlay.style.display = 'none';
+            bushes = new Set(BUSH_LAYOUT.map(b => b.x + ',' + b.y));
+            trees = new Set(TREE_LAYOUT.map(t => t.x + ',' + t.y));
+            if (lionTimer) clearInterval(lionTimer);
+            lionTimer = setInterval(tickLions, LION_STEP_MS);
+        }
+
+        function clamp(v, lo, hi) {
+            return Math.max(lo, Math.min(hi, v));
+        }
+
+        function hasBush(x, y) {
+            return bushes.has(x + ',' + y);
+        }
+
+        function hasTree(x, y) {
+            return trees.has(x + ',' + y);
+        }
+
+        function isFence(x, y) {
+            return y === FENCE_ROW && (x < FENCE_GAP_X || x >= FENCE_GAP_X + FENCE_GAP_W);
+        }
+
+        function isBlocked(x, y) {
+            if (x < 0 || x >= GRID_W || y < 0 || y >= GRID_H) return true;
+            if (hasBush(x, y)) return true;
+            if (hasTree(x, y)) return true;
+            if (isFence(x, y)) return true;
+            // Row 0 wall except door
+            if (y === 0 && (x < DOOR_X || x >= DOOR_X + DOOR_W)) return true;
+            return false;
+        }
+
+        function bunnyOnLion(bx, by) {
+            for (const lion of lions) {
+                if (bx >= lion.x && bx <= lion.x + 1 && by >= lion.y && by <= lion.y + 1) {
+                    return lion;
+                }
+            }
+            return null;
+        }
+
+        function pushBunnyFrom(lion) {
+            // Push bunny down 3 cells (back toward player area)
+            bunny.y = clamp(bunny.y + 3, 0, GRID_H - 1);
+        }
+
+        function inPushZone(lion, bx, by) {
+            return bx >= lion.x - 1 && bx <= lion.x + 2 && by >= lion.y - 1 && by <= lion.y + 2;
+        }
+
+        function lionBlockedByTree(lx, ly) {
+            for (let dx = 0; dx <= 1; dx++) {
+                for (let dy = 0; dy <= 1; dy++) {
+                    if (hasTree(lx + dx, ly + dy)) return true;
+                }
+            }
+            return false;
+        }
+
+        function lionsCrushBushes() {
+            for (const lion of lions) {
+                for (let dx = 0; dx <= 1; dx++) {
+                    for (let dy = 0; dy <= 1; dy++) {
+                        bushes.delete((lion.x + dx) + ',' + (lion.y + dy));
+                    }
+                }
+            }
+        }
+
+        function tickLions() {
+            if (status !== 'playing') return;
+
+            // Lion A tracks bunny
+            const targetA = clamp(bunny.x - 1, 0, GRID_W - 2);
+            let newAx = lions[0].x;
+            if (lions[0].x < targetA) newAx++;
+            else if (lions[0].x > targetA) newAx--;
+            newAx = clamp(newAx, 0, GRID_W - 2);
+
+            // Check Lion A against Lion B overlap and trees
+            const aOverlapsB = newAx < lions[1].x + 2 && newAx + 2 > lions[1].x;
+            if (!aOverlapsB && !lionBlockedByTree(newAx, lions[0].y)) {
+                lions[0].x = newAx;
+            }
+
+            // Lion B mirrors Lion A
+            const targetB = clamp(2 * MIRROR_AXIS - lions[0].x - 2, 0, GRID_W - 2);
+            let newBx = lions[1].x;
+            if (lions[1].x < targetB) newBx++;
+            else if (lions[1].x > targetB) newBx--;
+            newBx = clamp(newBx, 0, GRID_W - 2);
+
+            // Check Lion B against Lion A overlap and trees
+            const bOverlapsA = lions[0].x < newBx + 2 && lions[0].x + 2 > newBx;
+            if (!bOverlapsA && !lionBlockedByTree(newBx, lions[1].y)) {
+                lions[1].x = newBx;
+            }
+
+            // Crush bushes
+            lionsCrushBushes();
+
+            // Push check
+            let pushed = true;
+            let safety = 5;
+            while (pushed && safety-- > 0) {
+                pushed = false;
+                for (const lion of lions) {
+                    if (bunnyOnLion(bunny.x, bunny.y)) {
+                        pushBunnyFrom(lion);
+                        pushed = true;
+                    }
+                }
+            }
+
+            checkWin();
+            draw();
+        }
+
+        function checkWin() {
+            if (bunny.y === 0 && bunny.x >= DOOR_X && bunny.x <= DOOR_X + DOOR_W - 1) {
+                status = 'won';
+                if (lionTimer) clearInterval(lionTimer);
+                showOverlay();
+            }
+        }
+
+        function move(dx, dy) {
+            if (status !== 'playing') return;
+            let nx = bunny.x + dx;
+            let ny = bunny.y + dy;
+
+            // Clamp to grid
+            nx = clamp(nx, 0, GRID_W - 1);
+            ny = clamp(ny, 0, GRID_H - 1);
+
+            // Check all blockers
+            if (isBlocked(nx, ny)) {
+                nx = bunny.x;
+                ny = bunny.y;
+            }
+
+            // Check lion body collision
+            if (bunnyOnLion(nx, ny)) {
+                nx = bunny.x;
+                ny = bunny.y;
+            }
+
+            bunny.x = nx;
+            bunny.y = ny;
+
+            // Push zone check
+            for (const lion of lions) {
+                if (inPushZone(lion, bunny.x, bunny.y)) {
+                    pushBunnyFrom(lion);
+                }
+            }
+
+            checkWin();
+            draw();
+        }
+
+        function showOverlay() {
+            overlay.style.display = 'flex';
+            if (lionTimer) clearInterval(lionTimer);
+        }
+
+        function roundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+
+        function draw() {
+            const W = canvas.width;
+            const H = canvas.height;
+
+            // Background
+            ctx.fillStyle = '#101422';
+            ctx.fillRect(0, 0, W, H);
+            ctx.strokeStyle = '#1e2540';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(0, 0, W, H);
+
+            // Grid dots
+            ctx.fillStyle = '#1e2540';
+            for (let r = 0; r < GRID_H; r++) {
+                for (let c = 0; c < GRID_W; c++) {
+                    ctx.beginPath();
+                    ctx.arc(c * CELL + CELL / 2, r * CELL + CELL / 2, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Door
+            const doorGrad = ctx.createLinearGradient(DOOR_X * CELL, 0, (DOOR_X + DOOR_W) * CELL, CELL);
+            doorGrad.addColorStop(0, '#2e6b5a');
+            doorGrad.addColorStop(1, '#4aad8a');
+            ctx.fillStyle = doorGrad;
+            ctx.fillRect(DOOR_X * CELL, 0, DOOR_W * CELL, CELL);
+            ctx.strokeStyle = '#4aad8a';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(DOOR_X * CELL, 0, DOOR_W * CELL, CELL);
+
+            ctx.fillStyle = '#0b0f1c';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const doorFontSize = Math.max(10, CELL * 0.45);
+            ctx.font = doorFontSize + 'px "Courier New", monospace';
+            ctx.fillText('\u26E9 \u95E8', (DOOR_X + DOOR_W / 2) * CELL, CELL / 2);
+
+            // Row 0 walls (non-door)
+            ctx.fillStyle = '#0d1020';
+            ctx.fillRect(0, 0, DOOR_X * CELL, CELL);
+            ctx.fillRect((DOOR_X + DOOR_W) * CELL, 0, (GRID_W - DOOR_X - DOOR_W) * CELL, CELL);
+
+            // Fence
+            const fy = FENCE_ROW * CELL;
+            for (let c = 0; c < GRID_W; c++) {
+                if (c >= FENCE_GAP_X && c < FENCE_GAP_X + FENCE_GAP_W) continue;
+                const fx = c * CELL;
+                // Fence post
+                ctx.fillStyle = '#3a2815';
+                ctx.fillRect(fx + CELL * 0.4, fy + 2, CELL * 0.2, CELL - 4);
+                // Horizontal bars
+                ctx.fillStyle = '#6b5030';
+                ctx.fillRect(fx, fy + CELL * 0.2, CELL, 2);
+                ctx.fillRect(fx, fy + CELL * 0.5, CELL, 2);
+                ctx.fillRect(fx, fy + CELL * 0.8, CELL, 2);
+            }
+            // Fence gap markers (subtle ground marks)
+            ctx.fillStyle = 'rgba(74, 173, 138, 0.15)';
+            ctx.fillRect(FENCE_GAP_X * CELL, fy, FENCE_GAP_W * CELL, CELL);
+
+            // Bushes
+            for (const key of bushes) {
+                const [bx, by] = key.split(',').map(Number);
+                const px = bx * CELL;
+                const py = by * CELL;
+                ctx.fillStyle = '#1a3a28';
+                ctx.fillRect(px + 1, py + 1, CELL - 2, CELL - 2);
+                ctx.strokeStyle = '#2e6b4a';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(px + 1, py + 1, CELL - 2, CELL - 2);
+                const bushSize = Math.max(10, CELL * 0.55);
+                ctx.font = bushSize + 'px serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('\uD83C\uDF3F', px + CELL / 2, py + CELL / 2);
+            }
+
+            // Trees
+            for (const key of trees) {
+                const [tx, ty] = key.split(',').map(Number);
+                const px = tx * CELL;
+                const py = ty * CELL;
+                // Trunk
+                ctx.fillStyle = '#4a2e10';
+                ctx.fillRect(px + CELL * 0.35, py + CELL * 0.55, CELL * 0.3, CELL * 0.4);
+                // Canopy
+                ctx.fillStyle = '#1e4a1e';
+                ctx.beginPath();
+                ctx.arc(px + CELL / 2, py + CELL * 0.38, CELL * 0.42, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#2e6b2e';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                // Label
+                const treeSize = Math.max(8, CELL * 0.35);
+                ctx.font = treeSize + 'px "Courier New", monospace';
+                ctx.fillStyle = '#3a8a3a';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('T', px + CELL / 2, py + CELL * 0.38);
+            }
+
+            // Mirror axis
+            ctx.strokeStyle = 'rgba(120,160,220,0.5)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6, 4]);
+            const axisPixelX = MIRROR_AXIS * CELL + CELL / 2;
+            ctx.beginPath();
+            ctx.moveTo(axisPixelX, 0);
+            ctx.lineTo(axisPixelX, H);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = 'rgba(120,160,220,0.5)';
+            ctx.font = '9px "Courier New", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('AXIS', axisPixelX, H - 6);
+
+            // Lion push zones
+            for (const lion of lions) {
+                const zx = (lion.x - 1) * CELL;
+                const zy = (lion.y - 1) * CELL;
+                const zw = 4 * CELL;
+                const zh = 4 * CELL;
+                ctx.strokeStyle = 'rgba(193,54,40,0.25)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                ctx.strokeRect(zx, zy, zw, zh);
+                ctx.setLineDash([]);
+            }
+
+            // Lions
+            for (const lion of lions) {
+                const lx = lion.x * CELL;
+                const ly = lion.y * CELL;
+                const lw = 2 * CELL;
+                const lh = 2 * CELL;
+                const lionGrad = ctx.createLinearGradient(lx, ly, lx, ly + lh);
+                lionGrad.addColorStop(0, '#7a6548');
+                lionGrad.addColorStop(0.5, '#5c4a30');
+                lionGrad.addColorStop(1, '#3e3020');
+                roundRect(ctx, lx + 2, ly + 2, lw - 4, lh - 4, 6);
+                ctx.fillStyle = lionGrad;
+                ctx.fill();
+                ctx.strokeStyle = '#a08060';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                const lionEmoji = Math.max(12, CELL * 0.7);
+                ctx.font = lionEmoji + 'px serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('\uD83E\uDD81', lx + lw / 2, ly + lh / 2 - CELL * 0.15);
+
+                const labelSize = Math.max(8, CELL * 0.3);
+                ctx.font = labelSize + 'px "Courier New", monospace';
+                ctx.fillStyle = '#a08060';
+                ctx.fillText('\u77F3\u7345', lx + lw / 2, ly + lh / 2 + CELL * 0.4);
+            }
+
+            // Bunny
+            const bx = bunny.x * CELL + CELL / 2;
+            const by = bunny.y * CELL + CELL / 2;
+            const br = CELL * 0.4;
+            const bunnyGrad = ctx.createRadialGradient(bx, by, 0, bx, by, br);
+            bunnyGrad.addColorStop(0, '#f5ede0');
+            bunnyGrad.addColorStop(1, '#d4b896');
+            ctx.beginPath();
+            ctx.arc(bx, by, br, 0, Math.PI * 2);
+            ctx.fillStyle = bunnyGrad;
+            ctx.fill();
+            ctx.strokeStyle = '#f0e4d0';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            const bunnyEmoji = Math.max(10, CELL * 0.55);
+            ctx.font = bunnyEmoji + 'px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('\uD83D\uDC30', bx, by);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            const keyMap = {
+                'ArrowLeft': [-1, 0],
+                'ArrowRight': [1, 0],
+                'ArrowUp': [0, -1],
+                'ArrowDown': [0, 1]
+            };
+            if (keyMap[e.key]) {
+                e.preventDefault();
+                move(keyMap[e.key][0], keyMap[e.key][1]);
+            }
+        });
+
+        document.querySelectorAll('.dpad-btn').forEach(function(btn) {
+            btn.addEventListener('pointerdown', function(e) {
+                e.preventDefault();
+                btn.classList.add('active');
+                const dx = parseInt(btn.dataset.dx);
+                const dy = parseInt(btn.dataset.dy);
+                move(dx, dy);
+            });
+            btn.addEventListener('pointerup', function() {
+                btn.classList.remove('active');
+            });
+            btn.addEventListener('pointerleave', function() {
+                btn.classList.remove('active');
+            });
+        });
+
+        document.getElementById('retry-btn').addEventListener('click', function() {
+            initState();
+            draw();
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+
+        initState();
+        resizeCanvas();
+        draw();
+    </script>
+</body>
+</html>
