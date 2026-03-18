@@ -1,20 +1,12 @@
+<p>Opening SONGBOY in Steam...</p>
+<p>Didn't work? <a href="https://store.steampowered.com/app/4342020">
+  Get it on Steam</a></p>
+
 <script>
   const params = new URLSearchParams(window.location.search);
   const ugcId = params.get('ugc_id');
 
-  if (ugcId) {
-    window.location = `steam://run/4342020//?ugc_id=${ugcId};`;
-  } else {
-    // No UGC id, just open the game normally
-    window.location = "steam://run/4342020";
-  }
-
-  setTimeout(() => {
-    document.getElementById('fallback').style.display = 'block';
-  }, 2000);
+  window.location = ugcId
+    ? `steam://run/4342020//?ugc_id=${ugcId};`
+    : `steam://run/4342020`;
 </script>
-
-<div id="fallback" style="display:none">
-  <p>Don't have Steam? <a href="https://store.steampowered.com/app/4342020">
-  Get SONGBOY on Steam</a></p>
-</div>
